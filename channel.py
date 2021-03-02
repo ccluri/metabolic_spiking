@@ -1,7 +1,7 @@
 from utils import AttributeDict
 
 class Channel(object):
-    def __init__(self, name, Gmax, E_r, gates=[], sp_gates=None):
+    def __init__(self, name, Gmax, E_r, gates=[], sp_gates=[]):
         self.name = name
         self.Gmax = Gmax
         self.E_r = E_r
