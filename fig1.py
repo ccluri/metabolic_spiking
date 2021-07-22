@@ -4,6 +4,7 @@ from utils import Recorder, Q_nak
 from mitochondria import Mito
 from steady_state import get_steady_state
 from lifcell import LIFCell
+from gates import ros_inf, get_ros
 
 import figure_properties as fp
 import matplotlib.pyplot as plt
@@ -11,9 +12,6 @@ import matplotlib.gridspec as gridspec
 from matplotlib.collections import LineCollection
 import matplotlib.patches as mpatches
 from matplotlib import cm
-
-
-from gates import ros_inf, get_ros
 
 
 def single_spike(ax0):
@@ -188,7 +186,6 @@ def ros_land(ax, cax=None):
                                      alpha=0.5, zorder=10, facecolor='None',
                                      edgecolor='#4dac26', linewidth=2)
 
-    # past fet color = '#ff6666'
     fetbox = mpatches.FancyBboxPatch((0.0, 0.0), 0.45, 0.45, fill=False,
                                      boxstyle=bstyle,
                                      alpha=0.5, zorder=10, facecolor='None',

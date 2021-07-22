@@ -1,15 +1,15 @@
 import numpy as np
 
-from gates import hypoxia_inf, minisog_inf, aox_inf, teri_inf, ageing_inf, rotenone_inf
+from gates import minisog_inf, aox_inf, rotenone_inf
 
 import matplotlib.pyplot as plt
 from matplotlib import colors
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 from matplotlib.ticker import LogLocator, NullFormatter
 
-from palettable.colorbrewer.qualitative import Set2_8, Set3_8, Set1_8, Set3_12
-from palettable.colorbrewer.sequential import Reds_5, RdPu_5, BuPu_5
-from palettable.matplotlib import Viridis_6, Plasma_5
+
+from palettable.colorbrewer.qualitative import Set2_8, Set1_8, Set3_12
+from palettable.colorbrewer.sequential import RdPu_5, BuPu_5
 
 plt.rcParams.update({
     'font.family': 'sans-serif',
@@ -121,25 +121,8 @@ def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
     return new_cmap
 
 
-
-test_bl_atps = [10, 50, 100, 500]
-test_bl_clrs = ['#e41a1c', '#377eb8', '#4daf4a', '#984ea3']
-test_bl_markers = ['o', '^', 's', 'p'] # no of sides = atp consumption level
-
-hypoxia = {'ros':hypoxia_inf ,'atp_bl':30, 'Q':25}
-dfb = {'ros_sog':minisog_inf, 'atp_bl':[30], 'Q':20, 'ros_aox':aox_inf}
-
-# ca1 = {'ros':teri_inf, 'atp_bl':[10.7779418 ,  29.30700118,  27.45005909,  33.83886601,
-#                                  9.74197384,  23.27841053,  21.64849983,  24.28203825,
-#                                  29.0542684 ,  15.54064254], # np.random.randn(10)*10 + 20
-#        'Q':[14, 23, 20, 10, 16, 11, 27, 21, 26, 11]} # np.random.randint(10, 30, 10)
-
-r = np.random.RandomState(10)
-ca1 = {'ros':teri_inf, 'atp_bl': r.randn(100)*10 + 30, # np.random.randn(10)*10 + 20
-       'Q':r.randint(20, 30, 100)} # np.random.randint(10, 30, 10)
-# snc = {'ros':ageing_inf, 'atp_bl':25, 'Q':30}
 snc = {'ros': rotenone_inf, 'atp_bl': 25, 'Q': 30}
-
+dfb = {'ros_sog': minisog_inf, 'atp_bl': [30], 'Q': 20, 'ros_aox': aox_inf}
 
 def_colors = {'nad': Set2_8.hex_colors[6],
               'pyr': Set2_8.hex_colors[7],
@@ -184,37 +167,3 @@ ln_cols_q = [def_colors['ln10'], def_colors['ln11'], def_colors['ln12']]
 ln_cols_fet = ['#a6761d', '#e6ab02']
 ln_cols_ret = ['#1f78b4', '#a6cee3', 'k']
 ln_cols_rise = [def_colors['ln1'], def_colors['ln2'], def_colors['ln3']]
-
-
-class TestCases(object):
-    def __init__(self, bl, q, start, end, sizebar=100,
-                 arrowsx=[], texts={}, showyticks=False):
-        self.bl = bl
-        self.q = q
-        self.start = start
-        self.end = end
-        self.sizebar = sizebar  # ms
-        self.arrowsx = arrowsx
-        self.texts = texts
-        self.showyticks = showyticks
-
-# # ros_tau1
-t_regular = TestCases(38, 35, 1150, 1550, arrowsx=[1212], showyticks=True)
-t_fast_regular = TestCases(34, 35, 1050, 1450, arrowsx=[1114, 1380],
-                           texts={'1': 1114, '2': 1380})
-t_bursting = TestCases(34, 5, 1200, 1600, texts={'1': 1280, '2': 1285,
-                                                 '3': 1290, '10': 1330})
-t_continuous = TestCases(34, 0.15, 1500, 1600, sizebar=10)
-
-# t_regular = TestCases(40, 25, 1150, 1550, arrowsx=[1212], showyticks=True)
-# t_fast_regular = TestCases(30, 25, 1050, 1450, arrowsx=[1114, 1380],
-#                            texts={'1': 1114, '2': 1380})
-# t_bursting = TestCases(30, 5, 1200, 1600, texts={'1': 1280, '2': 1285,
-#                                                  '3': 1290, '10': 1330})
-# t_continuous = TestCases(30, 1, 1500, 1600, sizebar=10)
-
-# t_regular.inset_vals(0.66, 0.28, 0.24, 0.32) # 38, 35
-
-# firing_tests = [t_regular, t_fast_regular]
-firing_tests = [t_regular, t_fast_regular,
-                t_bursting, t_continuous]

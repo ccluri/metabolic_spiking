@@ -12,8 +12,6 @@ from math import exp
 
 PSI_max = 0.190  # V
 PSI_min = 0.125  # V
-# PSI_min = 0.132
-# PSI_min = 0.12
 
 R = 8.314  # J/(mol.K)
 T = 298  # K
@@ -66,9 +64,9 @@ beta5 = k5/k1*kgs*nt*at
 beta6 = k6/k1*oaas
 beta7 = k7/k1*pyrs*at
 beta8 = k8/k1*oaas
-betar = lambda kR=kr : kR/k1
-bant = lambda k_ant : k_ant/k1*at
-betal = lambda kL=kl : kL/k1*psim
+betar = lambda kR=kr: kR/k1
+bant = lambda k_ant: k_ant/k1*at
+betal = lambda kL=kl: kL/k1*psim
 
 Kn = K_nad/nt
 d6 = kgs/(oaas*Keq)
@@ -87,9 +85,9 @@ e5 = pyrs/nt
 e6 = pyrs/at
 e7 = pyrs/psis/C_mito
 
-pyr_sig = lambda pyr : (1-(1/(1+np.exp(-10*(pyr-1.7)))))
 to_psi = lambda dpsi : ((dpsi * 0.15) - PSI_min) / (PSI_max - PSI_min)
 to_dpsi = lambda psi : ((psi*(PSI_max-PSI_min)) + PSI_min) / 0.15
+
 
 class Mito(object):
     def __init__(self, pyr=1, acc=1, cit=1, akg=1, oaa=1,
@@ -103,10 +101,9 @@ class Mito(object):
         self.nad = nad
         self.atp = atp
         self.dpsi = dpsi
-        self.atp_range = atp_range  # operational range of mito
+        self.atp_range = atp_range  # K_ant from outside is 1/ks
         self.baseline_atp = baseline_atp
         self.k_r = k_r
-        # self.psi = self.dpsi / (0.2 / 0.15)
         self.psi = to_psi(self.dpsi)
         self.reaction_rates(current_atp=baseline_atp, current_leak=kl)
         self.derivatives()
@@ -155,12 +152,12 @@ class Mito(object):
         self.doaadt = (self.v5 + self.v7 - self.v3 - self.v8 - self.v6)*e4
         self.dnaddt = (-self.v2 - self.v4 - 2*self.v5 + self.vr)*e5
         self.datpdt = (self.vatp - self.vant + self.v5 - self.v7)*e6
-        self.ddpsidt = (10*self.vr- self.vl- 3*self.vatp - self.vant)*e7
+        self.ddpsidt = (10*self.vr - self.vl - 3*self.vatp - self.vant)*e7
 
     def update_vals(self, dt, atp_cost=0, leak_cost=0):
         taum = dtm*dt  # scaling
         current_atp = self.baseline_atp + atp_cost
-        current_leak = kl + leak_cost # as a factor of kl instead of normalizing
+        current_leak = kl + leak_cost  # as a factor of kl
         self.reaction_rates(current_atp, current_leak)
         self.derivatives()
         self.pyr += self.dpyrdt*taum
@@ -171,25 +168,8 @@ class Mito(object):
         self.nad += self.dnaddt*taum
         self.atp += self.datpdt*taum
         self.dpsi += self.ddpsidt*taum
-        # self.psi = self.dpsi / (0.2 / 0.15)  # re-normed version handy
         self.psi = to_psi(self.dpsi)
 
-    def clamped_vals(self, dt, atp, dpsi):
-        # This approach here is wrong
-        taum = dtm*dt  # scaling
-        self.reaction_rates(self.baseline_atp, kl)
-        self.derivatives()
-        self.pyr += self.dpyrdt*taum
-        self.acc += self.daccdt*taum
-        self.cit += self.dcitdt*taum
-        self.akg += self.dakgdt*taum
-        self.oaa += self.doaadt*taum
-        self.nad += self.dnaddt*taum
-        self.atp = atp # self.datpdt*taum
-        self.dpsi = dpsi # self.ddpsidt*taum
-        # self.psi = self.dpsi / (0.2 / 0.15)  # re-normed version handy
-        self.psi = to_psi(self.dpsi)
-        
     def steadystate_vals(self, time=2000):
         print('Baseline ATP = ', self.baseline_atp)
         print('ATP Op.Range = ', self.atp_range)
@@ -198,6 +178,7 @@ class Mito(object):
         for tt in np.arange(0, time, dt):
             self.update_vals(dt, atp_cost=0, leak_cost=0)
 
+
 if __name__ == '__main__':
     m = Mito(baseline_atp=53.87)
     m.steadystate_vals()
@@ -205,5 +186,3 @@ if __name__ == '__main__':
     print(m.fetch_actual_conc())
     print(m.fetch_actual_rates())
     print(m.fetch_rate_const())
-    # print(m.atp*at, m.dpsi*psim, m.pyr*pyrs)
-    # print(m.fetch_rates())

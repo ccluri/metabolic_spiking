@@ -301,7 +301,8 @@ def ret_cases_considered(gs0, firing_tests, theta_ret=0.025):
         ax0.add_patch(ccp)
         ccp2 = patches.ConnectionPatch(xyA=(xy_inset[0] + wd_inset,
                                             xy_inset[1]), xyB=(1, 1),
-                                       axesA=ax0, axesB=ax1, lw=0.3, color='gray',
+                                       axesA=ax0, axesB=ax1, lw=0.3,
+                                       color='gray',
                                        coordsA="data", coordsB="axes fraction")
         ax0.add_patch(ccp2)
         # Add sizebars
@@ -522,7 +523,7 @@ def fet_cases_considered(gs0, firing_tests, theta_fet):
     align_axis_labels([ax0, ax1, ax2, ax3], axis='y', value=-0.07)
     clean_ax([ax0, ax1, ax2, ax3])
 
-    
+
 def metabolic_signal_plot(gs, theta_ret, theta_fet):
     ax0 = plt.subplot(gs[0, 0])
     ax1 = plt.subplot(gs[0, 1])
@@ -589,8 +590,8 @@ def align_axis_labels(ax_list, axis='x', value=-0.25):
             ax.get_xaxis().set_label_coords(0.5, value)
         else:
             ax.get_yaxis().set_label_coords(value, 0.5)
-    
-        
+
+
 def clean_ax(axs):
     for ax in axs:
         ax.set_xticks([])
@@ -602,7 +603,8 @@ def clean_ax(axs):
 def plot_summary(gs, fet_cases, ret_cases):
     filename_prefix_ret = 'refrac_6_rise_0.6'
     filename_prefix_fet = 'iclamp2'
-    data = np.load('./spike_compensation/spike_compensate_summary_' + filename_prefix_ret + '.npz')
+    data = np.load('./spike_compensation/spike_compensate_summary_' +
+                   filename_prefix_ret + '.npz')
     mode = data['mode']
     spike_quanta = data['spike_quanta']
     mito_baseline = data['mito_baseline']
@@ -677,7 +679,8 @@ def plot_summary(gs, fet_cases, ret_cases):
 def fix_axis_ticks(axs, mito_baseline, spike_quanta):
     for ax in axs:
         ax.set_xticks(np.arange(0, len(mito_baseline), 4))
-        labels = ["{:d}".format(int(x)) for ii, x in enumerate(mito_baseline) if ii % 4 == 0]
+        labels = ["{:d}".format(int(x)) for ii, x in enumerate(mito_baseline)
+                  if ii % 4 == 0]
         ax.set_xticklabels(labels)
     axs[0].set_yticks(np.arange(len(spike_quanta))[::2])
     labels = ["{0:.1f}".format(x) for x in spike_quanta]
@@ -695,9 +698,11 @@ def single_run(case):
     gs = gridspec.GridSpec(5, 1, wspace=0.2, hspace=0.2,
                            height_ratios=[0.5, 0.75, 1, 1, 1])
     if case.test_type == 'ret':
-        spikes, t, r_mito, ros_vals, ms_vals = ret_run_sim(case, theta_ret=0.025)
+        spikes, t, r_mito, ros_vals, ms_vals = ret_run_sim(case,
+                                                           theta_ret=0.025)
     elif case.test_type == 'fet':
-        spikes, t, r_mito, ros_vals, ms_vals, i_stim = fet_run_sim(case, theta_fet=-0.05)
+        spikes, t, r_mito, ros_vals, ms_vals, i_stim = fet_run_sim(case,
+                                                                   theta_fet=-0.05)
     ax1 = plt.subplot(gs[1, 0])
     ax1.plot(spikes, [0]*len(spikes), 'ko', markersize=1)
     ax1.set_xlim([0, 2500])
@@ -746,7 +751,7 @@ if __name__ == '__main__':
     # MS map
     metabolic_signal_plot(gs0, theta_ret=0.025, theta_fet=-0.05)
 
-    # # # # fet cases
+    # # # # ret cases
     gs1 = gridspec.GridSpecFromSubplotSpec(4, 1, hspace=0.5,
                                            height_ratios=[1.5, 1, 1, 1],
                                            subplot_spec=gs[1, 0])
@@ -764,7 +769,7 @@ if __name__ == '__main__':
     ret_cases = [at_min_bl_fast, at_min_bl, at_min]
     ret_cases_considered(gs1, ret_cases)
 
-    # ret cases
+    # fet cases
     gs2 = gridspec.GridSpecFromSubplotSpec(4, 1, hspace=0.5,
                                            height_ratios=[1.5, 1, 1, 1],
                                            subplot_spec=gs[2, 0])
