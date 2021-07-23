@@ -1,3 +1,4 @@
+import os
 import sys
 import time
 import pickle
@@ -8,27 +9,30 @@ import numpy as np
 br.prefs.devices.cpp_standalone.openmp_threads = 4
 
 
-def fetch_ou_input():
-    ou_tau = 100*ms
-    ou_sigma = 0.03
-    ou_eq = '''dnoise/dt = -noise/ou_tau + ou_sigma*sqrt(2/ou_tau)*xi : 1'''
-    poi_eq = '''noise : 1 (linked)
-                rates=noise*int(noise>0)/ms : Hz '''
-    num_ous = 10
-    OU_In = br.NeuronGroup(num_ous, ou_eq, method='euler')
-    net_inp = br.NeuronGroup(total_neurons, poi_eq, refractory='5*ms',
-                             threshold='rand()<rates*dt', method='euler')
-    net_inp.noise = br.linked_var(OU_In, 'noise',
-                                  index=np.repeat(np.arange(num_ous),
-                                                  int(total_neurons/num_ous)))
-    return net_inp
-
-
-def fetch_poi_input():
-    net_inp = br.NeuronGroup(total_neurons*0.8, 'rates : Hz', refractory='5*ms',
-                             threshold='rand()<rates*dt', method='euler')
-    net_inp.rates = 3*Hz
-    return net_inp
+def big_sweep(connectivity, A_max):
+    print('Performing a sweep of the parameters, will take long')
+    cwd = os.getcwd()
+    if not os.path.isdir(os.path.join(cwd, 'netsim_results',
+                                      str(connectivity))):
+        os.mkdir(os.path.join(cwd, 'netsim_results', str(connectivity)))
+    br.device.reinit()
+    br.device.activate()
+    seed = 20
+    tau_A = 300
+    K_mu = 200
+    K_sig = 50
+    for we in np.linspace(0.1, 1, 10):
+        for wi in np.linspace(1, 10, 10):
+            params = ['nw', seed, we, wi, A_max, tau_A, K_mu, K_sig]
+            filename = '_'.join([str(ii) for ii in params])
+            print(filename)
+            pickle_path = os.path.join(cwd, 'netsim_results',
+                                       str(connectivity), filename)
+            main_loop(seed, we, wi, A_max, tau_A, K_mu, K_sig,
+                      connectivity, save_currs=False,
+                      path=pickle_path)
+            br.device.reinit()
+            br.device.activate()
 
 
 def fetch_poi_onoff_input(sim_time):
@@ -40,8 +44,8 @@ def fetch_poi_onoff_input(sim_time):
 
 
 def main_loop(seed=30001, we=0.6, wi=6.7, A_max=15,
-              tau_A=250, K_mu=500, K_sig=50, inp_type='poi_onoff', filename='',
-              save_currs=False, awake=False, curr_idxs=None):
+              tau_A=250, K_mu=500, K_sig=50, connectivity=20,
+              path='', save_currs=False):
     # we, wi is unitless here, but to get nS, /100Mohm
     start_time = time.time()
     np.random.seed(seed)
@@ -62,19 +66,8 @@ def main_loop(seed=30001, we=0.6, wi=6.7, A_max=15,
     I = 0*mV
     Amax = A_max*mV
     # Population's input
-    if awake:
-        if inp_type == 'ou':
-            print('OU input')
-            net_inp = fetch_ou_input()
-        elif inp_type == 'poi':
-            print('Poisson input')
-            net_inp = fetch_poi_input()
-        elif inp_type == 'poi_onoff':
-            print('Poisson on(half-time)-off(half-time)')
-            stim, net_inp = fetch_poi_onoff_input(sim_time)
-    else:
-        print('No input')
-        inp_type = 'off'
+    print('Poisson on(half-time)-off(half-time)')
+    stim, net_inp = fetch_poi_onoff_input(sim_time)
     # Neuron model
     eqs = '''
     K : volt
@@ -91,10 +84,16 @@ def main_loop(seed=30001, we=0.6, wi=6.7, A_max=15,
     '''
     total_exc = int(total_neurons*4 / 5)  # 3200
     total_inh = total_neurons - total_exc
-    P = br.NeuronGroup(total_neurons, eqs, threshold='v>Vt',
-                       refractory='5*ms - 3*ms*M',
-                       method='euler',
-                       reset='v=Vr; M-=0.1')
+    if np.isclose(A_max, 0):
+        P = br.NeuronGroup(total_neurons, eqs, threshold='v>Vt',
+                           refractory='5*ms',
+                           method='euler',
+                           reset='v=Vr; M-=0.1')
+    else:
+        P = br.NeuronGroup(total_neurons, eqs, threshold='v>Vt',
+                           refractory='5*ms - 3*ms*M',
+                           method='euler',
+                           reset='v=Vr; M-=0.1')
     P.v = (np.random.randn(len(P)) * 5. - 55.) * mV
     P.M = 0
     def_Ks = (K_sig*br.randn(len(P)) + K_mu) * mV
@@ -102,46 +101,39 @@ def main_loop(seed=30001, we=0.6, wi=6.7, A_max=15,
     # Connections
     Ce = br.Synapses(P, P, on_pre='ge += we')
     Ci = br.Synapses(P, P, on_pre='gi += wi')
-    Ce.connect('i<'+str(total_exc), p=0.02)
-    Ci.connect('i>='+str(total_exc), p=0.02)
-    if awake:
-        ex_inp_conn = br.Synapses(net_inp, P, on_pre='''ge += we''')
-        ex_inp_conn.connect(p=0.02)
+    Ce.connect('i<'+str(total_exc), p=connectivity/1000)
+    Ci.connect('i>='+str(total_exc), p=connectivity/1000)
+    # external inputs
+    ex_inp_conn = br.Synapses(net_inp, P, on_pre='''ge += we''')
+    ex_inp_conn.connect(p=connectivity/1000)
+    inp_type = 'poi_onoff'
     # Record
     s_mon = br.SpikeMonitor(P, ['M'])
     if save_currs:
-        if not curr_idxs:
-            t_mon = br.StateMonitor(P, variables=['Ie', 'Ii', 'M'],
-                                    record=True)
-            t_mon.active = False
-            br.run(0.475*sim_time)
-            t_mon.active = True
-            br.run(0.1*sim_time)
-            t_mon.active = False
-            br.run(0.425*sim_time)
-        else:
-            t_mon = br.StateMonitor(P, variables=['Ie', 'Ii', 'M'],
-                                    record=curr_idxs)
-            br.run(sim_time)
+        curr_idxs = [0, 1]  # Arbitrary choice of neuron index
+        t_mon = br.StateMonitor(P, variables=['Ie', 'Ii', 'M'],
+                                record=curr_idxs)
+        br.run(sim_time)
     else:
         br.run(sim_time)
     print('Elapsed time', time.time() - start_time)
-    if filename != '':
+    if path != '':
         data = s_mon.get_states(['t', 'i', 'M'])
         data['K'] = def_Ks
-        with open('./netsim_results/' + filename + '_' + inp_type +
+        with open(path + '_' + inp_type +
                   '_spks.pkl', 'wb') as ff:
             pickle.dump(data, ff)
         if save_currs:
             data = t_mon.get_states(['Ie', 'Ii', 'M', 't'])
-            with open('./netsim_results/' + filename + '_' + inp_type +
+            with open(path + '_' + inp_type +
                       '_currs.pkl', 'wb') as ff:
                 pickle.dump(data, ff)
         print('Done dumping')
     return s_mon
 
 
-def single_run(awake):
+def single_run():
+    print('Performing a single run of the simulation')
     br.device.reinit()
     br.device.activate()
     seed = 20
@@ -154,16 +146,21 @@ def single_run(awake):
     # 20_0.3_5_25_300_200_50
     params = [seed, we, wi, A_max, tau_A, K_mu, K_sig]
     filename = 'nw_' + '_'.join([str(ii) for ii in params])
+    print(filename)
+    filepath = './netsim_results/' + filename
     main_loop(seed, we, wi, A_max, tau_A, K_mu, K_sig,
-              save_currs=True, awake=awake, filename=filename,
-              curr_idxs=[0, 1])
+              save_currs=True, path=filepath)
     return
 
 
 total_neurons = 10000
 sim_time = 10*second
 if __name__ == '__main__':
-    if sys.argv[-1] == 'sleep':
-        single_run(awake=False)
+    if sys.argv[-1] == 'vogels2005':
+        print('Summary for Vogels&Abbott2005')
+        big_sweep(connectivity=20, A_max=0)
+    elif sys.argv[-1] == 'metabolic':
+        print('Summary for metabolic current network')
+        big_sweep(connectivity=20, A_max=25)
     else:
-        single_run(awake=True)
+        single_run()

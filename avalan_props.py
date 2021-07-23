@@ -1,14 +1,9 @@
 import pickle
 import powerlaw
-import os
-import glob
 
 from itertools import groupby
 from scipy.optimize import curve_fit
-from brian2 import second, np, Hz
-
-import matplotlib.pyplot as plt
-from matplotlib import gridspec
+from brian2 import second, np
 
 
 def process_data(times, nidx, M, bin_size):
@@ -132,79 +127,6 @@ def load_sim_file(ff):
     except KeyError:
         M = np.zeros_like(data['i'])
     return times, nidx, M
-
-
-def dump_avalan_summary(path):
-    file_list = glob.glob(path+'/*_spikes.pkl')
-    store_dict = {}
-    for filepath in file_list:
-        with open(filepath, 'rb') as ff:
-            dict_key = filepath.split('/')[-1].rstrip('.pkl')
-            times, nidx, M = load_sim_file(ff)
-            dict_entry = process_each_file(times, nidx, M)
-            store_dict[dict_key] = dict_entry
-            folder_name_seed = './netsim_plots/' + dict_key.split('_')[0]
-            if not os.path.isdir(folder_name_seed):
-                os.mkdir(folder_name_seed)
-            summary_spikes(total_neurons, sim_time, times, nidx, M,
-                           dict_key, dict_entry,
-                           filename='./'+folder_name_seed+'/'+dict_key+'.png')
-    return store_dict
-
-
-def summary_spikes(total_neurons, sim_time, times, nidx, M, dict_key,
-                   dict_entry, filename=''):
-    seed, we, wi, Amax, Atau, K_mu, K_sig = dict_key.split('_')
-    plt.figure(figsize=(15, 12))  # width x height
-    gs = gridspec.GridSpec(3, 4, wspace=0.3, hspace=0.2)  # row x column
-    ax0 = plt.subplot(gs[0:2, :])
-    ax3 = plt.subplot(gs[2, 0])
-    ax4 = plt.subplot(gs[2, 1])
-    ax5 = plt.subplot(gs[2, 2])
-    ax6 = plt.subplot(gs[2, 3])
-    ax0.scatter(times, nidx, c=M, alpha=1, s=0.05,
-                marker='.', vmax=1, vmin=-1, cmap='viridis')
-    ax0.set_title('mCOBA, Sim=' + dict_key + ', tau=' +
-                  str(dict_entry['palpha'])[:4] + ', bf=' +
-                  str(dict_entry['branch_fac'])[:4])
-    ax0.set_ylabel('Neuron index')
-    avg_fr = dict_entry['avg_fr']
-    train_isi = dict_entry['train_isi']
-    cvs = dict_entry['cvs']
-    
-    N, B = np.histogram(np.array(avg_fr), bins=np.linspace(0, 40, 41))
-    ax3.bar(B[:-1], N / np.sum(N), width=np.diff(B), fill=False)
-    ax3.plot((np.mean(avg_fr)*Hz, np.mean(avg_fr)*Hz),
-             (0, np.max(N)/np.sum(N)), 'r', lw=2)
-    ax3.set_xlabel('Avg firing rate (Hz)')
-
-    N, B = np.histogram(train_isi, bins=np.logspace(0, 3.1, 30))
-    ax4.bar(B[:-1], N / np.sum(N), width=np.diff(B), fill=False)
-    ax4.plot((np.mean(train_isi), np.mean(train_isi)),
-             (0, np.max(N)/np.sum(N)), 'r', lw=2)
-    ax4.set_xscale('symlog')
-    ax4.set_xlabel('ISI (ms)')
-
-    N, B = np.histogram(cvs, bins=np.linspace(0, 3, 30))
-    ax5.bar(B[:-1], N / np.sum(N), width=np.diff(B), fill=False)
-    ax5.plot((np.mean(cvs), np.mean(cvs)), (0, np.max(N)/np.sum(N)), 'r', lw=2)
-    ax5.set_xlabel('CV ISI')
-
-    N, B = np.histogram(M, bins=np.linspace(-2, 1, 31))
-    ax6.bar(B[:-1], N / np.sum(N), width=np.diff(B), fill=False)
-    ax6.plot((np.mean(M), np.mean(M)), (0, np.max(N)/np.sum(N)), 'r', lw=2)
-    ax6.set_xlabel('M')
-    neat_axs([ax0, ax3, ax4, ax5, ax6])
-    if len(filename) > 0:
-        plt.savefig(filename, dpi=300)
-    else:
-        plt.show()
-
-
-def neat_axs(ax_list):
-    for ax in ax_list:
-        ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(False)
 
 
 total_neurons = 10000
