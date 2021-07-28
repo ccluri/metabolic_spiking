@@ -104,7 +104,7 @@ def ros_ss(ax, ross, cases, atp_bl):
     ax.set_ylim(-0.1, 1.1)
     ax.set_yticks([0., .5, 1])
     ax.set_xscale('log')
-    ax.set_xlabel('Non-spiking costs (/ms)')
+    ax.set_xlabel('Non-spiking costs (%s)' % kANT_units)
     ax = fp.add_logticks(ax)
     ax.set_ylabel(r'ROS level (a.u.)')
     plt.gca().add_artist(leg1)
@@ -331,7 +331,7 @@ def align_axis_labels(ax_list, axis='x', value=-0.25):
         else:
             ax.get_yaxis().set_label_coords(value, 0.5)
 
-
+kANT_units = '10$^{-3}$/s'
 hold = -20  # pA
 v_leak = -40
 tau_m = 100.  # ms

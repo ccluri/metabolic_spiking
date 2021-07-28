@@ -15,7 +15,7 @@ class SNCDA(object):
         # Leak, cell parameters
         self.E_L = kwargs.pop('E_L', -68)  # mV
         self.g_leak = kwargs.pop('g_leak', 1)
-        self.tau_m = kwargs.pop('tau_m', 20)  # ms
+        self.C_m = kwargs.pop('C_m', 100)  # pF
         self.v = -68
         self.dvdt = 0
         
@@ -50,7 +50,7 @@ class SNCDA(object):
         r_tau = lambda v: 5  # ms
         r_inf = lambda v: 1 / (1+exp((-v - 55)/2))
         p_tau = lambda v: 0.01
-        p_inf = lambda v, ros: 1/(1+exp(-15*(ros-0.15)))
+        p_inf = lambda v, ros: 1/(1+exp(-15*(ros-0.12)))
         r = Gate('r', 1, r_inf, r_tau)  # Modulates G_NaP
         p = Gate('p', 1, p_inf, p_tau)
         self.Na_P = Channel('Na_P', self.g_nap, self.E_Na, [p, r],
@@ -87,7 +87,7 @@ class SNCDA(object):
         I_leak = self.Leak.I
         I_nap = self.Na_P.I
         I_katp = self.K_ATP.I
-        self.dvdt = (self.i_inj - I_leak - I_nap - I_katp) / self.tau_m
+        self.dvdt = (self.i_inj - I_leak - I_nap - I_katp) / self.C_m
         self.v += self.dvdt*dt
         if not self.spiked and self.v >= self.vthr:
             self.spiked = True
@@ -125,7 +125,7 @@ if __name__ == '__main__':
     mi = Mito(baseline_atp=baseline_atp)
     mi.steadystate_vals(time=1000)
     params = {'refrc': 5, 'Q': spike_quanta, 'init_atp': 1,
-              'g_nap': 10, 'g_katp': 15}
+              'g_nap': 110, 'g_katp': 100, 'g_leak': 15, 'C_m': 100}
     c1 = SNCDA('test', **params)
     dt = 0.01
     time = 2000
@@ -133,6 +133,8 @@ if __name__ == '__main__':
     qtime = np.arange(0, qdur, dt)
     this_q = Q_nak(qtime, spike_quanta)
     qlen = len(this_q)
+    from gates import get_parkinsons_rotenone
+    ros = get_parkinsons_rotenone()
     ros = get_ros()
     ros.init_val(1, 0)
     t = np.arange(0, time, dt)
@@ -150,7 +152,7 @@ if __name__ == '__main__':
     i_inj = np.zeros_like(t)
     t_start = 1000
     t_end = 1150
-    i_inj[int(t_start/dt):int(t_end/dt)] = 50
+    i_inj[int(t_start/dt):int(t_end/dt)] = 300
     for i in range(len(t)):
         c1.i_inj = i_inj[i]
         mi.update_vals(dt,

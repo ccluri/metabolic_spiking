@@ -30,10 +30,13 @@ def run_sim(mito_baseline, spike_quanta, ros, time, dt, i_inj=None,
     mi.steadystate_vals(time=1000)
     ros.init_val(1, 0)
     r_mito = Recorder(mi, ['atp', 'psi'], time, dt)
+    # params1 = {'Q': spike_quanta,
+    #            'init_ros': ros.val, 'init_atp': mi.atp,
+    #            'g_nap': 10, 'g_katp': 15}
     params1 = {'Q': spike_quanta,
                'init_ros': ros.val, 'init_atp': mi.atp,
-               'g_nap': 10, 'g_katp': 15}
-
+               'g_nap': 110, 'g_katp': 100, 'g_leak': 15, 'C_m': 100}
+    
     c1 = SNCDA('PD_model', **params1)
     r_cell = Recorder(c1, ['v', 'ros', 'atp'], time, dt)
     spike_expns = np.zeros_like(t)
@@ -68,13 +71,13 @@ def upper_run(axs, axs_meta, mito_baseline, spike_quanta):
     i_inj = np.zeros_like(t)
     t_start = 1000
     t_end = 1100
-    i_inj[int(t_start/dt):int(t_end/dt)] = 50
+    i_inj[int(t_start/dt):int(t_end/dt)] = 300
     t_start = 2500
     t_end = 2800
-    i_inj[int(t_start/dt):int(t_end/dt)] = 50
+    i_inj[int(t_start/dt):int(t_end/dt)] = 300
     t_start = 3800
     t_end = 3900
-    i_inj[int(t_start/dt):int(t_end/dt)] = 50
+    i_inj[int(t_start/dt):int(t_end/dt)] = 300
     r_cell_cntrl, r_mito_cntrl, spikes_cntrl, t = run_sim(mito_baseline,
                                                           spike_quanta,
                                                           ros, time, dt, i_inj)
@@ -321,7 +324,7 @@ if __name__ == '__main__':
     add_sizebars([ax_iclamp], y_offset=-2)
     ax_iclamp.set_xlabel('Time (ms)')
     ax_iclamp.set_ylabel('Current\nclamp')
-    ax_iclamp.text(-100, 50, '(nA)', va='center', ha='left')
+    ax_iclamp.text(-100, 300, '(nA)', va='center', ha='left')
     align_axis_labels([ax3, ax3_meta, ax4, ax4_meta, ax5, ax5_meta, ax_iclamp,
                        ax6, ax6_meta],
                       axis='y', value=-0.07)
