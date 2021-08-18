@@ -137,18 +137,18 @@ def plot_summary_ret(gs, filename_prefix_ret='refrac_6_rise_0.6'):
     mito_baseline = data['mito_baseline']
     ax1 = plt.subplot(gs[0, 0])
     rr = ax1.imshow(netros, origin='lower', cmap='Reds', vmin=0, vmax=1)
-    cax1 = plt.subplot(gs[1, 0])
-    cbar = plt.colorbar(rr, cax=cax1, orientation="horizontal")
-    cbar.set_ticks([0, 1])
+    # cax1 = plt.subplot(gs[1, 0])
+    # cbar = plt.colorbar(rr, cax=cax1, orientation="horizontal")
+    # cbar.set_ticks([0, 1])
     ax1.set_title('Average ROS (a.u.)', pad=5)
     ax2 = plt.subplot(gs[0, 1])
     fr_norm = colors.LogNorm(vmin=1, vmax=300)
     ii = ax2.imshow(fr*1000, origin='lower',
                     cmap=cm.viridis, norm=fr_norm)
-    cax2 = plt.subplot(gs[1, 1])
-    cbar = plt.colorbar(ii, cax=cax2, orientation="horizontal",
-                        extend='min')
-    cbar.set_ticks([1, 10, 100])
+    # cax2 = plt.subplot(gs[1, 1])
+    # cbar = plt.colorbar(ii, cax=cax2, orientation="horizontal",
+    #                     extend='min')
+    # cbar.set_ticks([1, 10, 100])
     ax2.set_title('Firing rate (Hz)', pad=5)
 
     ax3 = plt.subplot(gs[0, 2])
@@ -156,10 +156,10 @@ def plot_summary_ret(gs, filename_prefix_ret='refrac_6_rise_0.6'):
     new_cmap = fp.truncate_colormap(cmap, 0.15, 0.85)
     # cv_norm = colors.LogNorm(vmin=1, vmax=100)
     bb = ax3.imshow(cv, origin='lower', cmap=new_cmap, vmin=0, vmax=2)
-    cax3 = plt.subplot(gs[1, 2])
-    cbar = plt.colorbar(bb, cax=cax3, orientation="horizontal",
-                        extend='max')
-    cbar.set_ticks([0, 1, 2])
+    # cax3 = plt.subplot(gs[1, 2])
+    # cbar = plt.colorbar(bb, cax=cax3, orientation="horizontal",
+    #                     extend='max')
+    # cbar.set_ticks([0, 1, 2])
     ax3.set_title('CV', pad=5)
     ax1.set_ylabel('Per-spike cost Q (%s)' % Kant_units)
     ax2.set_xlabel('Non-spiking costs (%s)' % Kant_units)
@@ -180,15 +180,15 @@ def plot_summary_fet(gs, filename_prefix_fet):
     ax1 = plt.subplot(gs[2, 0])
     rr = ax1.imshow(netros_bl-netros,
                     origin='lower', cmap='Reds', vmin=0, vmax=1)
-    cax1 = plt.subplot(gs[3, 0])
+    cax1 = plt.subplot(gs[1, 0])
     cbar = plt.colorbar(rr, cax=cax1, orientation="horizontal")
     cbar.set_ticks([0, 1])
     ax1.set_title(r'$\Delta$ ROS (a.u.)', pad=5)
     ax2 = plt.subplot(gs[2, 1])
-    fr_norm = colors.LogNorm(vmin=1, vmax=100)
+    fr_norm = colors.LogNorm(vmin=1, vmax=300)
     ii = ax2.imshow(fr, origin='lower',
                     cmap=cm.viridis, norm=fr_norm)
-    cax2 = plt.subplot(gs[3, 1])
+    cax2 = plt.subplot(gs[1, 1])
     cbar = plt.colorbar(ii, cax=cax2, orientation="horizontal",
                         extend='min')
     cbar.set_ticks([1, 10, 100])
@@ -198,7 +198,7 @@ def plot_summary_fet(gs, filename_prefix_fet):
     new_cmap = fp.truncate_colormap(cmap, 0.15, 0.85)
     bb = ax3.imshow(cv, origin='lower', cmap=new_cmap,
                     vmin=0, vmax=2)
-    cax3 = plt.subplot(gs[3, 2])
+    cax3 = plt.subplot(gs[1, 2])
     cbar = plt.colorbar(bb, cax=cax3, orientation="horizontal",
                         extend='max')
     cbar.set_ticks([0, 1, 2])
@@ -262,9 +262,9 @@ if __name__ == '__main__':
     fig.set_constrained_layout_pads(w_pad=0, h_pad=0)
     gs = gridspec.GridSpec(4, 3,
                            height_ratios=[3, 1.25, 3.07, 0.07])
-    gs00 = gridspec.GridSpecFromSubplotSpec(4, 3, wspace=0.2, hspace=0.8,
+    gs00 = gridspec.GridSpecFromSubplotSpec(3, 3, wspace=0.2, hspace=0.5,
                                             height_ratios=[0.9, 0.07,
-                                                           0.9, 0.07],
+                                                           0.9],
                                             subplot_spec=gs[0, :])
 
     plot_summary_ret(gs00, filename_prefix_ret='refrac_6_rise_0.6')
