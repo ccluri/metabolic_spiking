@@ -24,6 +24,13 @@ This will refresh / re-populate the contents of these folders (i) ./reaction_rat
 
 You will have Figure1.png and Figure1_supp.png in your folder after this.
 
+For this figure split in two parts type
+
+       (py36)user@computer:~/metabolic_spiking$ python fig1a.py
+       (py36)user@computer:~/metabolic_spiking$ python fig1b.py
+
+You will have Figure1a.png and Figure1b.png in your folder after this.
+
 ### Figure 2 & supplementary
 Please run ret_intrinsic_summary.py and fet_intrinsic_summary.py for starting from the beginning, you can skip this if you don't want to use the pre-generated data.
 
