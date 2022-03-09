@@ -7,9 +7,9 @@ from matplotlib import colors
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 from matplotlib.ticker import LogLocator, NullFormatter
 
-
+from palettable.cartocolors.sequential import Burg_5
 from palettable.colorbrewer.qualitative import Set2_8, Set1_8, Set3_12
-from palettable.colorbrewer.sequential import RdPu_5, BuPu_5
+from palettable.colorbrewer.sequential import RdPu_5, BuPu_5, YlGn_5
 
 plt.rcParams.update({
     'font.family': 'sans-serif',
@@ -98,15 +98,15 @@ def align_axis_labels(ax_list, axis='x', value=-0.25):
             ax.get_yaxis().set_label_coords(value, 0.5)
 
 
-def add_logticks(axx, xax=True):
+def add_logticks(axx, xax=True, ticks=[1, 10, 100, 1000]):
     if xax:
-        axx.set_xticks([1, 10, 100, 1000])
+        axx.set_xticks(ticks)
         x_minor = LogLocator(base=10.0, subs=np.arange(1.0, 10.0)*0.1,
                              numticks=10)
         axx.xaxis.set_minor_locator(x_minor)
         axx.xaxis.set_minor_formatter(NullFormatter())
     else:
-        axx.set_yticks([1, 10, 100, 1000])
+        axx.set_yticks(ticks)
         y_minor = LogLocator(base=10.0, subs=np.arange(1.0, 10.0)*0.1,
                              numticks=10)
         axx.yaxis.set_minor_locator(y_minor)
@@ -143,6 +143,12 @@ def_colors = {'nad': Set2_8.hex_colors[6],
               'ln13': RdPu_5.hex_colors[1],
               'ln14': RdPu_5.hex_colors[2],
               'ln15': RdPu_5.hex_colors[3],
+              'ln16': Burg_5.hex_colors[0],
+              'ln17': Burg_5.hex_colors[2],
+              'ln18': Burg_5.hex_colors[4],
+              'ln19': YlGn_5.hex_colors[1],
+              'ln20': YlGn_5.hex_colors[2],
+              'ln21': YlGn_5.hex_colors[3],
               'ros': '#1f77b4',
               'hyp': '#ca0020',
               'teri': '#008000',
@@ -161,7 +167,9 @@ colormap_dict = {'Continuous': '#f4cae4',  # Pastel2_8 cb2
                  'Adapting': '#e6f5c9'}
 
 ln_cols_mcu = [def_colors['ln1'], def_colors['ln2'], def_colors['ln3']]
-ln_cols_ros = [def_colors['ln7'], def_colors['ln8'], def_colors['ln9']]
+ln_cols_ros2 = [def_colors['ln7'], def_colors['ln8'], def_colors['ln9']]
+ln_cols_ros = [def_colors['ln16'], def_colors['ln17'], def_colors['ln18']]
+# ln_cols_ros2 = [def_colors['ln19'], def_colors['ln20'], def_colors['ln21']]
 ln_cols_tau = [def_colors['ln13'], def_colors['ln14'], def_colors['ln15']]
 ln_cols_q = [def_colors['ln10'], def_colors['ln11'], def_colors['ln12']]
 ln_cols_fet = ['#a6761d', '#e6ab02']

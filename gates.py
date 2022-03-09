@@ -51,6 +51,10 @@ minisog_inf = lambda atp, psi : ((atp*psi) + ((1-atp)*(1-psi)))**3 + 0.1
 aox_inf = lambda atp, psi : (((atp*psi)/1.15) + (((1-atp)*(1-psi))/1.15))**3
 rotenone_inf = lambda atp, psi : (((atp*psi)/1.25) + (((1-atp)*(1-psi))/0.8))**3
 
+ros_tau_const_fast = lambda atp, bls: 5  # const.
+ros_tau_const = lambda atp, bls: 50  # const.
+ros_tau_const_slow = lambda atp, bls: 500  # const.
+
 
 def get_ros():
     ros = Gate('ros', 1, inf=ros_inf, tau=ros_tau)
@@ -66,6 +70,24 @@ def get_ros_slow():
 
 def get_ros_fast():
     ros = Gate('ros_fast', 1, inf=ros_inf, tau=ros_tau_fast)
+    ros.init_val(1, 0)
+    return ros
+
+
+def get_ros_const():
+    ros = Gate('ros_const', 1, inf=ros_inf, tau=ros_tau_const)
+    ros.init_val(1, 0)
+    return ros
+
+
+def get_ros_const_slow():
+    ros = Gate('ros_const_slow', 1, inf=ros_inf, tau=ros_tau_const_slow)
+    ros.init_val(1, 0)
+    return ros
+
+
+def get_ros_const_fast():
+    ros = Gate('ros_const_fast', 1, inf=ros_inf, tau=ros_tau_const_fast)
     ros.init_val(1, 0)
     return ros
 
