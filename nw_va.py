@@ -21,7 +21,7 @@ def big_sweep(connectivity, A_max):
     tau_A = 300
     K_mu = 200
     K_sig = 50
-    for we in np.linspace(0.1, 1, 10):
+    for we in np.linspace(0.1, 1, 10):  # creates entries like 0.30000000004
         for wi in np.linspace(1, 10, 10):
             params = ['nw', seed, we, wi, A_max, tau_A, K_mu, K_sig]
             filename = '_'.join([str(ii) for ii in params])
@@ -134,6 +134,9 @@ def main_loop(seed=30001, we=0.6, wi=6.7, A_max=15,
 
 def single_run():
     print('Performing a single run of the simulation')
+    print('Dumps results in ./netsim_results/* folder')
+    print('Connectivity is 0.2% (default)')
+    print('Results used in the network figure (fig3_nw.py)')
     br.device.reinit()
     br.device.activate()
     seed = 20
@@ -157,10 +160,10 @@ total_neurons = 10000
 sim_time = 10*second
 if __name__ == '__main__':
     if sys.argv[-1] == 'vogels2005':
-        print('Summary for Vogels&Abbott2005')
+        print('Sims for Vogels&Abbott2005')
         big_sweep(connectivity=20, A_max=0)
     elif sys.argv[-1] == 'metabolic':
-        print('Summary for metabolic current network')
+        print('Sims for metabolic current network')
         big_sweep(connectivity=20, A_max=25)
     else:
         single_run()

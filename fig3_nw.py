@@ -370,24 +370,12 @@ if __name__ == '__main__':
         times, nidx, M = avaln.load_sim_file(ff)
         # duration is unitless but in seconds
         dict_entry = avaln.process_each_file(times, nidx, M, duration=10)
-        fhalf_idx = np.where(times <= sim_time/2/ms)
-        times_fhalf = times[fhalf_idx]
-        nidx_fhalf = nidx[fhalf_idx]
-        M_fhalf = M[fhalf_idx]
-        dict_entry_fhalf = avaln.process_each_file(times_fhalf,
-                                                   nidx_fhalf,
-                                                   M_fhalf, duration=5)
-        shalf_idx = np.where(times > sim_time/2/ms)
-        times_shalf = times[shalf_idx]
-        nidx_shalf = nidx[shalf_idx]
-        M_shalf = M[shalf_idx]
-        dict_entry_shalf = avaln.process_each_file(times_shalf,
-                                                   nidx_shalf,
-                                                   M_shalf, duration=5)
+        dict_fh, dict_sh, M_fh, M_sh = avaln.props_split(times, nidx,
+                                                         M, sim_time)
         plot_filename = filename.rstrip('_spks.pkl') + '.png'
         plot_filename = 'Figure3_nw.png'
         summary_spikes(total_neurons, sim_time, times,
                        nidx, M, dict_key, dict_entry, filename=plot_filename,
-                       opt_dicts=[dict_entry_fhalf, dict_entry_shalf,
-                                  M_fhalf, M_shalf],
+                       opt_dicts=[dict_fh, dict_sh,
+                                  M_fh, M_sh],
                        curr_filename=curr_filename)
