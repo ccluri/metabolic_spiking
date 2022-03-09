@@ -21,8 +21,9 @@ This will refresh / re-populate the contents of these folders (i) ./reaction_rat
 
        (py36)user@computer:~/metabolic_spiking$ python fig1.py
        (py36)user@computer:~/metabolic_spiking$ python fig1_supp.py
+       (py36)user@computer:~/metabolic_spiking$ python fig1_supp_b.py
 
-You will have Figure1.png and Figure1_supp.png in your folder after this.
+You will have Figure1.png, Figure1_supp.png, Figure1_supp_b.png in your folder after this.
 
 For this figure split in two parts type
 
@@ -65,7 +66,14 @@ This will output Figure3_nw.png file
        (py36)user@computer:~/metabolic_spiking$ python nw_va.py vogels2005
        (py36)user@computer:~/metabolic_spiking$ python nw_va.py metabolic
 
-Each of the above command takes a long time to execute (>12Hrs depending on your machine), and can take up ~10Gb space on your machine. It creates the data for the summary plots from the original paper, and for this paper for one seed and with connectivity of 0.02 (both seed and connectivity were changed, and the results are nearly identical). Only after these two are executed the following command  will work.
+Each of the above command takes a long time to execute (>12Hrs depending on your machine), and can take up ~10Gb space on your machine. It creates the data for the summary plots from the original paper, and for this paper for one seed and with connectivity of 0.02 are reported. Please note that both seed and connectivity were also tested and the results are nearly identical (not shown). This is easily achivied in the code). Only after these two are executed the following command  will work. Many files are created (./netsim_results/20/*_spks.pkl) with actual spike times and other useful variables.  
+
+After this, we compute the avalanche properties for the datasets from above. For this use the following for bulk summary analysis.
+
+     	(py36)user@computer:~/metabolic_spiking$ python avalan_props.py vogels2005
+	(py36)user@computer:~/metabolic_spiking$ python avalan_props.py metabolic
+
+These commands will produce as many files with the summary data as pickles (./netsim_results/20/*_summary.pkl)
 
      	(py36)user@computer:~/metabolic_spiking$ python fig3_nw_supp.py
 
