@@ -255,16 +255,16 @@ def run_sim(test_freq, spike_quanta, psi_fac=0.1e-4, ros=get_ros(), tau_Q=100):
 
 kANT_units = '10$^{-3}$/s'
 #  half a column size is
-figsize = fp.cm_to_inches([13, 10])
+figsize = fp.cm_to_inches([10, 8])
 fig = plt.figure(figsize=figsize)
 fig.set_constrained_layout_pads(w_pad=0, h_pad=0)
 gs = gridspec.GridSpec(2, 2, figure=fig,
                        hspace=4, wspace=1,
-                       height_ratios=[1., 2.2],
-                       width_ratios=[2.5, 1])
+                       height_ratios=[2, 1],
+                       width_ratios=[2, 1])
 
-gs00 = gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=gs[1, :],
-                                        width_ratios=[2, 1.2], wspace=0.2)
+gs00 = gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=gs[0, :],
+                                        width_ratios=[2, 1], wspace=0.2)
 gs22 = gridspec.GridSpecFromSubplotSpec(2, 1, subplot_spec=gs00[1],
                                         hspace=0.1)
 
@@ -272,7 +272,9 @@ ax_rosland = fig.add_subplot(gs00[0])
 ax_rosland, surf = ros_land(ax_rosland, None)
 ax_rosland = plot_bl_curve(ax_rosland)
 
-ax_rosss = fig.add_subplot(gs[0, 1])
+gslow = gridspec.GridSpecFromSubplotSpec(1, 3, subplot_spec=gs[1, :],
+                                         width_ratios=[1.5, 1, 1])
+ax_rosss = fig.add_subplot(gslow[0, 1])
 ax_rosss = ros_ss(ax_rosss)
 ax_rosss.spines['top'].set_visible(False)
 ax_rosss.spines['right'].set_visible(False)
@@ -302,12 +304,12 @@ fp.align_axis_labels([ax_spikecost],
 
 gs.tight_layout(fig)
 
-rect = 0.52, 0.075, 0.01, 0.515
+rect = 0.52, 0.48, 0.01, 0.46
 cbaxes = fig.add_axes(rect)
 cb = plt.colorbar(surf, cax=cbaxes,
                   orientation='vertical', ticks=[0, 1])
 cb.set_label('ROS level (a.u.)', labelpad=-3)
 
-plt.savefig('Figure1a.png', dpi=300)
+plt.savefig('Spike_comp.png', dpi=300)
 # plt.show()
 
