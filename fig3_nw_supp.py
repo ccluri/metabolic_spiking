@@ -238,6 +238,6 @@ gs.tight_layout(fig, rect=[0, 0., 1, 1])
 ax0.text(1.1, 1.4, s='With metabolic current', transform=ax0.transAxes,
          color='k', va='center', ha='center', clip_on=False)
 
-ax1.text(1.1, 1.4, s='Vogels & Abbot 2005', transform=ax1.transAxes,
+ax1.text(1.1, 1.4, s='Vogels & Abbott 2005', transform=ax1.transAxes,
          color='k', va='center', ha='center', clip_on=False)
 plt.savefig('Figure3_nw_supp.png', dpi=300)
