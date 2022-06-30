@@ -74,6 +74,7 @@ def main_loop(seed=30001, we=0.6, wi=6.7, A_max=15,
     Ie = ge*(E_ex-v) : volt
     Ii = gi*(E_inh-v) : volt
     Isum = (Ie - Ii) : volt
+    Inet = (Ie + Ii) : volt
     frac = (2*K/ (K+Isum)) : 1
     Minf = (2 / (1 + exp(-8*(frac-1.)))) -1: 1
     tauAf = tauAmax*exp(-(frac-1)**2/0.0098) + tauA :second
@@ -108,7 +109,7 @@ def main_loop(seed=30001, we=0.6, wi=6.7, A_max=15,
     ex_inp_conn.connect(p=connectivity/1000)
     inp_type = 'poi_onoff'
     # Record
-    s_mon = br.SpikeMonitor(P, ['M'])
+    s_mon = br.SpikeMonitor(P, ['M', 'Inet'])
     if save_currs:
         curr_idxs = [0, 1]  # Arbitrary choice of neuron index
         t_mon = br.StateMonitor(P, variables=['Ie', 'Ii', 'M'],
@@ -118,7 +119,7 @@ def main_loop(seed=30001, we=0.6, wi=6.7, A_max=15,
         br.run(sim_time)
     print('Elapsed time', time.time() - start_time)
     if path != '':
-        data = s_mon.get_states(['t', 'i', 'M'])
+        data = s_mon.get_states(['t', 'i', 'M', 'Inet'])
         data['K'] = def_Ks
         with open(path + '_' + inp_type +
                   '_spks.pkl', 'wb') as ff:

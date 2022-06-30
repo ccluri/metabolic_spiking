@@ -23,32 +23,33 @@ def summary_spikes(total_neurons, sim_time, times, nidx, M, dict_key,
     seed, we, wi, Amax, Atau, K_mu, K_sig = dict_key.split('_')
     start_time = 0.475*sim_time/ms
     end_time = (0.1+0.475)*sim_time/ms
-    figsize = fp.cm_to_inches([8.9, 11])
+    figsize = fp.cm_to_inches([8.9, 19])
     fig = plt.figure(figsize=figsize)  # width x height
     fig.set_constrained_layout_pads(w_pad=0, h_pad=0)
-    gs = gridspec.GridSpec(5, 5, wspace=0.0, hspace=0.,
-                           width_ratios=[1.4, 1, 1, 1, 1],
-                           height_ratios=[0.5, 1, 0.5, 0.5, 1.])  # row x column
-    gsx = gridspec.GridSpecFromSubplotSpec(4, 1, hspace=0.25,
+    gs = gridspec.GridSpec(7, 4, wspace=0.4, hspace=0.,
+                           width_ratios=[1, 1, 1, 1],
+                           height_ratios=[1, 0.5, 0.8, 0.5, 0.5, 1, 1])  # row x column
+    gsx = gridspec.GridSpecFromSubplotSpec(4, 1, hspace=0.4,
                                            height_ratios=[0.5, 0.8, 0.5, 0.5],
-                                           subplot_spec=gs[0:4, 1:])
-    gsy = gridspec.GridSpecFromSubplotSpec(2, 1, hspace=0.,
-                                           height_ratios=[0.7, 0.3],
-                                           subplot_spec=gs[2:4, 0])
-    
-    ax0 = plt.subplot(gsx[0, 0])  # population activity summary
-    ax1 = plt.subplot(gsy[0, 0])  # Default status; M plot
-    ax2 = plt.subplot(gsx[1, 0])  # Colored raster (M vals)
-    ax3 = plt.subplot(gsx[2, 0], sharex=ax2)  # Current values of the zoom
-    ax32 = plt.subplot(gsx[3, 0])  # Current values of the zoom
+                                           subplot_spec=gs[1:5, :])
+    gsy = gridspec.GridSpecFromSubplotSpec(1, 2,
+                                           width_ratios=[0.7, 0.3],
+                                           subplot_spec=gs[0, :])
+    ax1 = plt.subplot(gsy[0, 1])  # Default status; M plot
+    ax0 = plt.subplot(gsx[0, :])  # population activity summary
+    ax2 = plt.subplot(gsx[1, :])  # Colored raster (M vals)
+    ax3 = plt.subplot(gsx[2, :], sharex=ax2)  # Current values of the zoom
+    ax3c = plt.subplot(gsx[3, :])  # Current values of the zoom
+    # ax3c.plot([0, -100], [0, -100])
     Amax = int(Amax)
     Minf = lambda frac : (2 / (1 + np.exp(-8*(frac-1.)))) - 1
     test_ks = np.geomspace(0.1, 10, num=100)
     ax1.plot(test_ks, Minf((2/(1+test_ks))),
              c='#d95f02', lw=0.5)
     ax1.set_ylabel('I$_{metabolic}$', labelpad=-7)
-    ax1.text(0, 1.0, s='(nA)', color='k', va='center', ha='left',
+    ax1.text(-0.2, 1.1, s='(nA)', color='k', va='center', ha='center',
              transform=ax1.transAxes, clip_on=False)
+    # set_ylabel('%', loc='top', rotation=0, labelpad=-5)
     ax1.set_xscale('log')
     ax1.set_yticks([-1, 0, 1])
     ax1.set_yticklabels([-Amax/100, 0, Amax/100])
@@ -59,14 +60,20 @@ def summary_spikes(total_neurons, sim_time, times, nidx, M, dict_key,
     ax1.plot(2, -1.2, marker='*', clip_on=False, color='gold', markersize=7,
              markeredgecolor='k', markeredgewidth=0.5, zorder=10)
     ax1.set_xlabel('x'+r'<ATP$_{syn}$>')
-    gs0 = gridspec.GridSpecFromSubplotSpec(1, 5, wspace=0.4, hspace=0.,
-                                           width_ratios=[1, 1, 1, 1, 1],
-                                           subplot_spec=gs[4, :])
+    gs0 = gridspec.GridSpecFromSubplotSpec(1, 4, wspace=0.4, hspace=0.3,
+                                           width_ratios=[1, 1, 1, 1],
+                                           subplot_spec=gs[5, :])
+    gs1 = gridspec.GridSpecFromSubplotSpec(1, 3, wspace=0.4, hspace=0.,
+                                           width_ratios=[1, 1, 1],
+                                           subplot_spec=gs[6, :])
     ax4 = plt.subplot(gs0[0, 0])  # Average fr
     ax5 = plt.subplot(gs0[0, 1])  # ISI
     ax6 = plt.subplot(gs0[0, 2])  # CV
     ax7 = plt.subplot(gs0[0, 3])  # M
-    ax8 = plt.subplot(gs0[0, 4])  # Avalanches
+
+    ax8 = plt.subplot(gs1[0, 0])  # Avalanches time
+    ax9 = plt.subplot(gs1[0, 1])  # Avalanches pop
+    ax91 = plt.subplot(gs1[0, 2])  # Avalanches space
     times_zoom = times[np.logical_and((times >= start_time),
                                       (times < end_time))]
     nidx_zoom = nidx[np.logical_and((times >= start_time), (times < end_time))]
@@ -168,36 +175,14 @@ def summary_spikes(total_neurons, sim_time, times, nidx, M, dict_key,
     ax3.plot(data_curr['t']/ms, data_curr['Ii'][:, test_ii]/mV/100,
              c='#3465a4', lw=0.5, label='inhibitory')
     # 5 ms smoothing
-    ax32.plot(data_curr['t']/ms, runningMeanFast((data_curr['Ie'][:, test_ii]/mV +
-                                                  data_curr['Ii'][:, test_ii]/mV +
-                                                  Amax*data_curr['M'][:, test_ii])/100, 50),
-              c='gray', lw=0.5, label='net', zorder=9)
-    ax32.plot(data_curr['t']/ms, runningMeanFast(Amax*data_curr['M'][:, test_ii]/100, 50),
-              c='#d95f02', lw=0.5, label='metabolic', zorder=10)
-    ax32.plot(data_curr['t']/ms, runningMeanFast((data_curr['Ie'][:, test_ii]/mV +
-                                                  data_curr['Ii'][:, test_ii]/mV)/100, 50),
-              c='#7D26CD', lw=0.5, label='synaptic', zorder=8)
     ax3.set_ylabel('Current (nA)')
     ax3.set_ylim([-4, 5])
     ax3.set_yticks([-3, 0, 3])
-
-    ax32.set_ylabel(' Current (nA)')
-    ax32.set_ylim([-0.6, 0.6])
-    ax32.set_yticks([-0.6, 0, 0.6])
-    ax32.set_xlim([start_time, end_time])
-    ax32.set_xticks([])
-    ax32.set_xticklabels([])
     ax3.spines['bottom'].set_visible(False)
     ax3.spines['top'].set_visible(False)
     ax3.spines['left'].set_visible(False)
-    ax32.spines['bottom'].set_visible(False)
-    ax32.spines['top'].set_visible(False)
-    ax32.spines['left'].set_visible(False)
     ax3.legend(frameon=False, ncol=2, loc='lower center',
                bbox_to_anchor=(0.5, -0.4))
-    ax32.legend(frameon=False, ncol=3, loc='lower center',
-                bbox_to_anchor=(0.5, -0.6))
-    
     ymin, ymax = ax3.get_ybound()
     asb = AnchoredSizeBar(ax3.transData,
                           int(50),
@@ -209,18 +194,39 @@ def summary_spikes(total_neurons, sim_time, times, nidx, M, dict_key,
                           frameon=False, label_top=False,
                           size_vertical=(ymax-ymin)/1000)
     ax3.add_artist(asb)
-    ymin, ymax = ax32.get_ybound()
-    asb = AnchoredSizeBar(ax32.transData,
+
+    ax3c.plot(data_curr['t']/ms, runningMeanFast((data_curr['Ie'][:, test_ii]/mV +
+                                                  data_curr['Ii'][:, test_ii]/mV +
+                                                  Amax*data_curr['M'][:, test_ii])/100, 50),
+              c='gray', lw=0.5, label='net', zorder=9)
+    ax3c.plot(data_curr['t']/ms, runningMeanFast(Amax*data_curr['M'][:, test_ii]/100, 50),
+              c='#d95f02', lw=0.5, label='metabolic', zorder=10)
+    ax3c.plot(data_curr['t']/ms, runningMeanFast((data_curr['Ie'][:, test_ii]/mV +
+                                                  data_curr['Ii'][:, test_ii]/mV)/100, 50),
+              c='#7D26CD', lw=0.5, label='synaptic', zorder=8)
+    ax3c.set_ylabel(' Current (nA)')
+    ax3c.set_ylim([-0.6, 0.6])
+    # ax32.set_yticks([-0.6, 0, 0.6])
+    ax3c.set_xlim([start_time, end_time])
+    ax3c.set_xticks([])
+    ax3c.set_xticklabels([])
+    ax3c.spines['bottom'].set_visible(False)
+    ax3c.spines['top'].set_visible(False)
+    ax3c.spines['left'].set_visible(False)
+    ax3c.legend(frameon=False, ncol=3, loc='lower center',
+                bbox_to_anchor=(0.5, -0.4))
+    ymin, ymax = ax3c.get_ybound()
+    asb = AnchoredSizeBar(ax3c.transData,
                           int(50),
                           '50 ms',
                           loc='lower left',
                           bbox_to_anchor=(0.9, -0.2),
-                          bbox_transform=ax32.transAxes,
+                          bbox_transform=ax3c.transAxes,
                           pad=0., borderpad=.0, sep=2,
                           frameon=False, label_top=False,
                           size_vertical=(ymax-ymin)/1000)
-    ax32.add_artist(asb)
-    align_axis_labels([ax0, ax2, ax3, ax32], axis='y', value=-0.07)
+    ax3c.add_artist(asb)
+    align_axis_labels([ax0, ax2, ax3, ax3c], axis='y', value=-0.07)
     
     avg_fr = dict_entry['avg_fr']
     train_isi = dict_entry['train_isi']
@@ -243,11 +249,11 @@ def summary_spikes(total_neurons, sim_time, times, nidx, M, dict_key,
                  (0, np.max(N)/np.sum(N)), c='gold', lw=.75, ls='--')
         ax4.plot((np.mean(avg_fr_sh)*Hz, np.mean(avg_fr_sh)*Hz),
                  (0, np.max(N)/np.sum(N)), c='k', lw=.75, ls='--')
-    ax4.set_xlabel('Avg firing rate\n(Hz)')
+    ax4.set_xlabel('Avg firing rate(Hz)')
     ax4.set_xticks([0, 5, 10, 15, 20])
     ax4.set_yticks([0, 0.1, 0.2])
     ax4.set_yticklabels([0, 10, 20])
-    ax4.set_ylabel('%', loc='top', rotation=0, labelpad=-10)
+    ax4.set_ylabel('%', loc='top', rotation=0, labelpad=-5)
     ax4.set_xticklabels([0, '', 10, '', 20])
     ax4.set_xlim([-5, 27])
     ax4.set_ylim([-0.01, 0.22])
@@ -266,7 +272,7 @@ def summary_spikes(total_neurons, sim_time, times, nidx, M, dict_key,
     ax5.set_xlabel('ISI (ms)')
     ax5.set_yticks([0, 0.05, 0.1])
     ax5.set_yticklabels([0, 5, 10])
-    ax5.set_ylabel('%', loc='top', rotation=0, labelpad=-10)
+    ax5.set_ylabel('%', loc='top', rotation=0, labelpad=-5)
 
     N, B = np.histogram(cvs, bins=np.linspace(0, 3, 30))
     if opt_dicts:
@@ -285,7 +291,7 @@ def summary_spikes(total_neurons, sim_time, times, nidx, M, dict_key,
     ax6.set_xticks([0, 1, 2, 3])
     ax6.set_yticks([0, 0.1, 0.2])
     ax6.set_yticklabels([0, 10, 20])
-    ax6.set_ylabel('%', loc='top', rotation=0, labelpad=-10)
+    ax6.set_ylabel('%', loc='top', rotation=0, labelpad=-5)
 
     N, B = np.histogram(M, bins=np.linspace(-2, 1, 31))
     if opt_dicts:
@@ -305,7 +311,8 @@ def summary_spikes(total_neurons, sim_time, times, nidx, M, dict_key,
     ax7.set_xlim([-2, 1])
     ax7.set_yticks([0, 0.05, 0.1, 0.15])
     ax7.set_yticklabels([0, 5, 10, 15])
-    ax7.set_ylabel('%', loc='top', rotation=0, labelpad=-10)
+    ax7.set_ylabel('%', loc='top', rotation=0, labelpad=-5)
+
     fits_t_sh = opt_dicts[1]['fit_t']
     fits_t_sh.plot_pdf(ax=ax8, color='k', markersize=1, marker='o',
                        linestyle='None')
@@ -317,14 +324,62 @@ def summary_spikes(total_neurons, sim_time, times, nidx, M, dict_key,
              horizontalalignment='center',
              verticalalignment='center',
              transform=ax8.transAxes, color='k')
-    ax8.set_xlabel('Avalanch dur.\n(ms)')
-    ax8.set_ylabel('P(D)', loc='top', rotation=0, labelpad=-22)
+    ax8.set_xlabel('Avalanche dur.\n(ms)')
+    ax8.set_ylabel('P(D)', loc='top', rotation=0, labelpad=-12)
     ax8.set_xticks([1, 10, 100, 1000])
     ax8.set_ylim([2*10**-5, 2*10**0])
     ax8.set_yticks([10**-4, 10**-2, 10**0])
-    align_axis_labels([ax4, ax5, ax6, ax7, ax8], axis='x', value=-0.25)
-    neat_axs([ax0, ax1, ax2, ax3, ax32, ax4, ax5, ax6, ax7, ax8])
-    gs.tight_layout(fig)
+
+    fits_sh = opt_dicts[1]['fit_s']
+    fits_sh.plot_pdf(ax=ax9, color='k', markersize=1, marker='o',
+                     linestyle='None')
+    fits_sh.power_law.plot_pdf(ax=ax9, lw=0.5, color='k')
+    fits_fh = opt_dicts[0]['fit_s']
+    fits_fh.plot_pdf(ax=ax9, color='gold', markersize=1,
+                     marker='o')
+    ax9.text(0.6, 0.95, s=r'$\alpha_{S}=$'+str(opt_dicts[1]['palpha'])[:4],
+             horizontalalignment='center',
+             verticalalignment='center',
+             transform=ax9.transAxes, color='k')
+    ax9.set_xlabel('Avalanche size')
+    ax9.set_ylabel('P(S)', loc='top', rotation=0, labelpad=-12)
+    ax9.set_xticks([1, 100, 10000, 1000000])
+    ax9.set_ylim([2*10**-7, 2*10**0])
+    #ax9.set_yticks([10**-4, 10**-2, 10**0])
+
+    avaln_s = opt_dicts[1]['avalns']
+    avaln_t = opt_dicts[1]['avalns_t']
+    # logx = np.log10(avaln_t)
+    # logy = np.log10(avaln_s)
+    # coeffs = np.polyfit(logx, logy, deg=3)
+    # poly = np.poly1d(coeffs)
+    # yfit = lambda x: 10**(poly(np.log(x)))
+    # ax91.loglog(avaln_t, yfit(avaln_t), lw=0.5, color='k')
+    ax91.loglog(avaln_t, avaln_s, color='k', markersize=1, marker='o',
+                linestyle='None')
+    # slope = opt_dicts[1]['beta_fit'][0]
+    # intercept = opt_dicts[1]['beta_fit'][1]
+    # test_pts = [1, 1000]
+    # op_pts = [(slope*ii)+intercept for ii in test_pts]
+    # ax91.loglog(test_pts, op_pts, lw=0.5, color='k')
+    # ax91.text(0.1, 0.95, s=r'1/$\gamma_{fit}=$'+str(opt_dicts[1]['beta_fit'][0])[:4],
+    #           horizontalalignment='left',
+    #           verticalalignment='center',
+    #           transform=ax91.transAxes, color='k')
+    ax91.set_ylabel('Avalanche size')
+    ax91.set_xlabel('Avalanche dur.\n(ms)')
+    ax91.set_xticks([1, 10, 100, 1000])
+    ax91.set_yticks([1, 100, 10000, 1000000])
+    # ax9.set_xticks([1, 100, 10000, 1000000])
+    # ax9.set_ylim([2*10**-7, 2*10**0])
+    # ax9.set_yticks([10**-4, 10**-2, 10**0])
+    # ax3c.plot([0, 100], [0, 100])
+    gs.tight_layout(fig)    
+    align_axis_labels([ax4, ax5, ax6, ax7], axis='x', value=-0.3)
+    # align_axis_labels([ax8, ax9, ax91], axis='x', value=-0.5)
+    neat_axs([ax0, ax1, ax2, ax3, ax3c,
+              ax4, ax5, ax6, ax7, ax8, ax9, ax91])
+
     if len(filename) > 0:
         plt.savefig(filename, dpi=300)
     else:
@@ -363,9 +418,10 @@ if __name__ == '__main__':
     total_neurons = 10000
     sim_time = 10*second
     bin_size = 1  # ms
+    connectivity = 20
     dict_key = '20_0.3_5_25_300_200_50'
-    filename = './netsim_results/nw_' + dict_key + '_poi_onoff_spks.pkl'
-    curr_filename = './netsim_results/nw_' + dict_key + '_poi_onoff_currs.pkl'
+    filename = './netsim_results/' + str(connectivity) + '/nw_' + dict_key + '_poi_onoff_spks.pkl'
+    curr_filename = './netsim_results/' + str(connectivity) + '/nw_' + dict_key + '_poi_onoff_currs.pkl'
     with open(filename, 'rb') as ff:
         times, nidx, M = avaln.load_sim_file(ff)
         # duration is unitless but in seconds

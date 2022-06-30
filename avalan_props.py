@@ -81,8 +81,8 @@ def comp_powerlaw_coefs(fit, fit_t):
     return alpha, s_cutoff, palpha, talpha, beta
 
 
-def firing_prop_summary(total_neurons, times, nidx, duration):
-    trains = invert_spikemonitor(total_neurons, times, nidx)
+def firing_prop_summary(total_neurons, times, nidx, duration, M):
+    trains, Ms = invert_spikemonitor(total_neurons, times, nidx, M)
     avg_fr = []
     train_isi = []  # np.array(())
     cvs = []
@@ -93,12 +93,12 @@ def firing_prop_summary(total_neurons, times, nidx, duration):
         avg_fr.append(len(trains[ii]) / duration)
         if len(isi) > 0:
             cvs.append(np.std(isi)/np.mean(isi))
-    return avg_fr, train_isi, cvs
+    return avg_fr, train_isi, cvs, Ms
 
 
 def process_each_file(times, nidx, M, duration, full=True):
-    avg_fr, train_isi, cvs = firing_prop_summary(total_neurons, times,
-                                                 nidx, duration)
+    avg_fr, train_isi, cvs, Ms = firing_prop_summary(total_neurons, times,
+                                                     nidx, duration, M)
     bin_size = 1  # ms but unitless
     bins, valids, m_vals = process_data(times, nidx, M, bin_size)
     avalns, avalns_t, branch_fac = calc_avalan(valids, bin_size)
@@ -118,6 +118,7 @@ def process_each_file(times, nidx, M, duration, full=True):
                   'beta_fit': beta_fit,
                   'avg_fr': avg_fr,
                   'train_isi': train_isi,
+                  'Ms': Ms,
                   'cvs': cvs}
     if full:
         dict_entry.update({'m_vals': m_vals,
@@ -128,11 +129,15 @@ def process_each_file(times, nidx, M, duration, full=True):
     return dict_entry
 
 
-def invert_spikemonitor(total_neurons, times, nidx):
+def invert_spikemonitor(total_neurons, times, nidx, M):
     s_mon_dict = {}
+    m_mon_dict = {}
     for ii in range(total_neurons):
-        s_mon_dict[ii] = np.sort(times[np.where(nidx == ii)])
-    return s_mon_dict
+        X = times[np.where(nidx == ii)]
+        Y = M[np.where(nidx == ii)]
+        m_mon_dict[ii] = [pp for _, pp in sorted(zip(X, Y))]
+        s_mon_dict[ii] = np.sort(X)
+    return s_mon_dict, m_mon_dict
 
 
 def load_sim_file(ff):
@@ -154,7 +159,8 @@ def props_split(times, nidx, M, sim_time=10*second, full=True):
     M_fhalf = M[fhalf_idx]
     dict_fhalf = process_each_file(times_fhalf,
                                    nidx_fhalf,
-                                   M_fhalf, duration=hdur,
+                                   M_fhalf,
+                                   duration=hdur,
                                    full=full)
     shalf_idx = np.where(times > hdur/ms)
     times_shalf = times[shalf_idx]
@@ -162,7 +168,8 @@ def props_split(times, nidx, M, sim_time=10*second, full=True):
     M_shalf = M[shalf_idx]
     dict_shalf = process_each_file(times_shalf,
                                    nidx_shalf,
-                                   M_shalf, duration=hdur,
+                                   M_shalf,
+                                   duration=hdur,
                                    full=full)
     return dict_fhalf, dict_shalf, M_fhalf, M_shalf
 
@@ -174,7 +181,7 @@ def dump_summary(path, seed, case='*'):
     for filepath in file_list:
         print(filepath)
         with open(filepath, 'rb') as ff:
-            times, nidx, M = load_sim_file(ff)
+            times, nidx, M, inet = load_sim_file(ff)
             d_fh, d_sh, M_fh, M_sh = props_split(times, nidx, M,
                                                  sim_time, full=False)
         dummyname = filepath.split('/')[-1].rstrip('_poi_onoff_spks.pkl')
