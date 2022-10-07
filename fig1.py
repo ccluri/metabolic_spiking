@@ -69,7 +69,7 @@ def quantum(ax1):
     Qval = np.zeros_like(tt)
     vals = Q_nak(tt, 30)
     Qval[int(150/dt):] += vals[:len(Qval[int(150/dt):])]
-
+    lns = ax1.plot(tt, Qval, color='w', alpha=0) # fake line
     points = np.array([tt, Qval]).T.reshape(-1, 1, 2)
     segments = np.concatenate([points[:-1], points[1:]], axis=1)
     norm = plt.Normalize(0, 500)
@@ -87,8 +87,10 @@ def quantum(ax1):
     empty_string_labels = [' ']*len(labels)
     ax1.set_yticklabels(empty_string_labels)
     ax1.plot(-25, 0, marker='*', c='k', clip_on=False, markersize=7.5,
-             markeredgecolor='none')
+             markeredgewidth=0.5, markeredgecolor='white', zorder=10)
     ax1.text(s='+Q', x=85, y=27.5, fontsize=7)
+    fp.add_arrow(lns[0], position=155, color='k', size=6.5)
+    fp.add_arrow(lns[0], position=300, color='k', size=6.5)
     ax1.set_xlim(-25, 500)
 
 
@@ -137,8 +139,10 @@ def excursion(ax2):
     ax2.set_ylim(0, 1.)
     ax2.set_xticks([0, 0.5, 1])
     ax2.set_yticks([0, 0.5, 1])
+    ax2.set_xticklabels([0, '', 1])
+    ax2.set_yticklabels([0, '', 1])
     ax2.set_xlabel('$ATP_M$')
-    ax2.set_ylabel(r'$\Delta\psi$')
+    ax2.set_ylabel(r'$\Delta\psi$', rotation=0)
     return ax2
 
 
@@ -190,9 +194,9 @@ def ros_land(ax, cax=None):
                                      boxstyle=bstyle,
                                      alpha=0.5, zorder=10, facecolor='None',
                                      edgecolor='#d01c8b', linewidth=2)
-    ax.text(0.07, -.1, 'FETROS',
+    ax.text(0.07, .5, 'FETROS',
             fontsize=7, color='#d01c8b').set_clip_on(False)
-    ax.text(0.65, 0.45, 'RETROS',
+    ax.text(0.65, 1.05, 'RETROS',
             fontsize=7, color='#4dac26').set_clip_on(False)
     retbox.set_clip_on(False)
     fetbox.set_clip_on(False)
@@ -203,8 +207,10 @@ def ros_land(ax, cax=None):
     ax.set_ylim(0, 1)
     ax.set_xticks([0, 0.5, 1])
     ax.set_yticks([0, 0.5, 1])
+    ax.set_xticklabels([0, '', 1])
+    ax.set_yticklabels([0, '', 1])
     ax.set_xlabel(r'$ATP_M$')
-    ax.set_ylabel(r'$\Delta\psi$')
+    ax.set_ylabel(r'$\Delta\psi$', rotation=0)
     return ax, surf
 
 
@@ -318,35 +324,44 @@ def figure_steady_state_simpler(ax1):
 
 kANT_units = '10$^{-3}$/s'
 #  half a column size is
-figsize = fp.cm_to_inches([8.9, 13.])
+figsize = fp.cm_to_inches([8.9, 13.5])
 fig = plt.figure(figsize=figsize)
 fig.set_constrained_layout_pads(w_pad=0, h_pad=0)
 gs = gridspec.GridSpec(3, 2, figure=fig, height_ratios=[1.35, 1.35, 1],
                        width_ratios=[1, 1])
 
-gs22 = gridspec.GridSpecFromSubplotSpec(2, 1, subplot_spec=gs[1, 0],
-                                        hspace=0.1)
-
-ax_steadys = fig.add_subplot(gs[0, 0])
-ax_steadys = figure_steady_state_simpler(ax_steadys)
-ax_steadys = fp.add_logticks(ax_steadys)
-
-ax_rosland = fig.add_subplot(gs[0, 1])
+ax_rosland = fig.add_subplot(gs[0, 0])
 ax_rosland, surf = ros_land(ax_rosland, None)
 ax_rosland = plot_bl_curve(ax_rosland)
 
-ax_rosss = fig.add_subplot(gs[2, 0])
+ax_rosss = fig.add_subplot(gs[0, 1])
 ax_rosss = ros_ss(ax_rosss)
 ax_rosss.spines['top'].set_visible(False)
 ax_rosss.spines['right'].set_visible(False)
 ax_rosss = fp.add_logticks(ax_rosss)
+ax_rosss.tick_params(axis='x', which='major', pad=3)
 
+ax_excursion = fig.add_subplot(gs[1, 0])
+excursion(ax_excursion)
+
+gs22 = gridspec.GridSpecFromSubplotSpec(2, 1, subplot_spec=gs[1, 1],
+                                        hspace=0.1)
 ax_spikecost = fig.add_subplot(gs22[1, 0])
 ax_fakespike = fig.add_subplot(gs22[0, 0], sharex=ax_spikecost)
-ax_excursion = fig.add_subplot(gs[1, 1])
 single_spike(ax_fakespike)
 quantum(ax_spikecost)
-excursion(ax_excursion)
+
+ax_steadys = fig.add_subplot(gs[2, 0])
+ax_steadys = figure_steady_state_simpler(ax_steadys)
+ax_steadys = fp.add_logticks(ax_steadys)
+ax_steadys.tick_params(axis='x', which='major', pad=3)
+
+ax_compensate = fig.add_subplot(gs[2, 1])
+ax_compensate = metabolic_spikes(ax_compensate)
+ax_compensate.spines['top'].set_visible(False)
+ax_compensate.spines['right'].set_visible(False)
+ax_compensate = fp.add_logticks(ax_compensate)
+ax_compensate.tick_params(axis='x', which='major', pad=3)
 
 ax_fakespike.spines['top'].set_visible(False)
 ax_fakespike.spines['right'].set_visible(False)
@@ -355,31 +370,36 @@ ax_fakespike.get_xaxis().set_visible(False)
 ax_spikecost.spines['top'].set_visible(False)
 ax_spikecost.spines['right'].set_visible(False)
 
-ax_compensate = fig.add_subplot(gs[2, 1])
-ax_compensate = metabolic_spikes(ax_compensate)
-ax_compensate.spines['top'].set_visible(False)
-ax_compensate.spines['right'].set_visible(False)
-ax_compensate = fp.add_logticks(ax_compensate)
 
-fp.align_axis_labels([ax_steadys, ax_fakespike,
-                      ax_rosss],
+# ax_rosland, ax_rosss
+# ax_excursion, ax_fakespike
+# ax_excursion, ax_spikecost
+# ax_steadys, ax_compensate
+
+fp.align_axis_labels([ax_steadys, ax_excursion,
+                      ax_rosland],
+                     axis='y', value=-0.15)
+fp.align_axis_labels([ax_rosss, ax_fakespike,
+                      ax_compensate],
                      axis='y', value=-0.15)
 fp.align_axis_labels([ax_spikecost], axis='y', value=-0.02)
 
-fp.align_axis_labels([ax_rosland, ax_excursion,
-                      ax_compensate],
-                     axis='y', value=-0.15)
-fp.align_axis_labels([ax_steadys],
-                     axis='x', value=-0.14)
+# fp.align_axis_labels([ax_rosland, ax_excursion,
+#                      ax_compensate],
+#                     axis='y', value=-0.15)
+
+# fp.align_axis_labels([ax_steadys, ax_compensate],
+#                      axis='x', value=-0.2)
+
 fp.align_axis_labels([ax_rosland],
-                     axis='x', value=-0.14)
+                     axis='x', value=-0.1)
 fp.align_axis_labels([ax_spikecost],
                      axis='x', value=-0.28)
 fp.align_axis_labels([ax_excursion],
                      axis='x', value=-0.14)
 
 gs.tight_layout(fig)
-rect = 0.6, 0.65, 0.35, 0.01
+rect = 0.125, 0.67, 0.33, 0.01
 cbaxes = fig.add_axes(rect)
 cb = plt.colorbar(surf, cax=cbaxes,
                   orientation='horizontal', ticks=[0, 1])

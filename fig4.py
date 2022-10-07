@@ -12,7 +12,7 @@ import figure_properties as fp
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
-
+from matplotlib.patches import Rectangle
 
 def run_sim(mito_baseline, spike_quanta, ros, time, dt, i_inj=None,
             Q_nak_def=Q_nak, psi_fac=0.1e-4):
@@ -197,15 +197,30 @@ def ros_sss(ax, ross, cases, atp_bl):
             ros1_vals[ii] = ros(atp(bl), psi(bl))
         these_ros.append(ros1_vals)
     case_clrs = ['k', fp.def_colors['park1']]
+
+    xy_leftbox = [1, 0]
+    p = Rectangle(xy_leftbox, bls[46]-0.1, 1, clip_on=False,
+                  edgecolor='none', facecolor='#dcdcdc', alpha=0.5)
+    ax.add_patch(p)
+    xy_leftbox = [bls[80], 0]
+    p = Rectangle(xy_leftbox, bls[-1], 1, clip_on=False,
+                  edgecolor='none', facecolor='#dcdcdc', alpha=0.5)
+    ax.add_patch(p)
+    
     for ii, rr in enumerate(these_ros):
-        ax.plot(bls, rr, label=cases[ii], lw=0.5,
+        ax.plot(bls[46:80], rr[46:80], label=cases[ii], lw=0.7,
                 c=case_clrs[ii])
+        ax.plot(bls[:45], rr[:45], lw=0.5,
+                c=case_clrs[ii], ls='-.')
+        ax.plot(bls[81:], rr[81:], lw=0.5,
+                c=case_clrs[ii], ls='-.')
+
     cnt_ros = ross[0](atp(atp_bl[0]), psi(atp_bl[0]))
     park_ros = ross[1](atp(atp_bl[0]), psi(atp_bl[0]))
     ax.plot(atp_bl[0], -0.1, marker='*', c='k',
             clip_on=False, markersize=7,
             markeredgecolor='none')
-    ax.plot(60, -0.1, marker='*', c='gold', label='Lysosomal',
+    ax.plot(60, -0.1, marker='*', c='gold', label='Lysosomal\ndefects',
             clip_on=False, markersize=7, zorder=10, linestyle='None',
             markeredgecolor='k', markeredgewidth=0.5)
     
@@ -247,7 +262,7 @@ def quantum(ax1):
     ax1.set_yticks([])
     ax1.set_yticklabels([])
     ax1.plot(-25, 0, marker='*', c='k', clip_on=False, markersize=7,
-             markeredgecolor='none')
+             markeredgewidth=0.5, markeredgecolor='white', zorder=10)
 
     ax1.text(s='+Q', x=85, y=27.5, fontsize=5)
     ax1.text(s='+3Q', x=85, y=87.5, fontsize=5)
@@ -260,7 +275,7 @@ def quantum(ax1):
 
 if __name__ == '__main__':
     Kant_units = '(10$^{-3}$/s)'
-    figsize = fp.cm_to_inches([8.9, 12])
+    figsize = fp.cm_to_inches([8.9, 15])
     fig = plt.figure(figsize=figsize)
     fig.set_constrained_layout_pads(w_pad=0, h_pad=0)
     gs = gridspec.GridSpec(2, 2, wspace=0.5, hspace=0.5, height_ratios=[1, 4])
@@ -276,10 +291,13 @@ if __name__ == '__main__':
     hndles2, lbels2 = ax2.get_legend_handles_labels()
     hndles.append(hndles2[-1])
     lbels.append(lbels2[-1])
-    leg1 = plt.legend(hndles, lbels, frameon=False, loc='upper center',
-                      ncol=4, bbox_to_anchor=(0, 0.816, 1, 0.2),
-                      bbox_transform=fig.transFigure, handlelength=1)
-    plt.gca().add_artist(leg1)
+    # leg1 = plt.legend(hndles, lbels, frameon=False, loc='upper center',
+    #                   ncol=4, bbox_to_anchor=(0, 0.82, 1, 0.2),
+    #                   bbox_transform=fig.transFigure, handlelength=1)
+    # plt.gca().add_artist(leg1)
+
+    # plt.gca().add_artist(leg1)
+    
     align_axis_labels([ax1, ax2], axis='x', value=-0.2)
     gs00 = gridspec.GridSpecFromSubplotSpec(5, 1, subplot_spec=gs[1, :],
                                             hspace=0.3,
@@ -330,4 +348,9 @@ if __name__ == '__main__':
                       axis='y', value=-0.07)
     align_axis_labels([ax1], axis='y', value=-0.2)
     gs.tight_layout(fig)
-    plt.savefig('Figure4.png', dpi=300)
+    # plt.subplots_adjust(top=0.8)
+    leg1 = fig.legend(hndles, lbels, frameon=False, loc='upper center',
+                      ncol=4, bbox_to_anchor=(0, 0.85, 1, 0.2),
+                      bbox_transform=fig.transFigure, handlelength=1)
+
+    plt.savefig('Figure4.png', dpi=300, bbox_inches='tight')

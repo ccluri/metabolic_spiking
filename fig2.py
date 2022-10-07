@@ -243,7 +243,7 @@ def ret_cases_considered(gs0, firing_tests, theta_ret=0.025):
             make_raster_plot(ax0, ii*3, spk, spikes_offset, l_col)
     #  Set limits
     if case.start is not False:
-        ax0.set_xlim(case.start-25, 1075)
+        ax0.set_xlim(case.start-25, 875)
 
         ax1.set_xlim(0, end_idx-start_idx)
         ax2.set_xlim(0, end_idx-start_idx)
@@ -254,7 +254,7 @@ def ret_cases_considered(gs0, firing_tests, theta_ret=0.025):
         ax3.set_ylim(0.018, 0.027)
         ax3.plot([0, 20000], [theta_ret, theta_ret], lw=0.5, ls='--',
                  color=fp.def_colors['ret'], zorder=-11)
-        ax3.text(6000, 0.025, s=r'$\theta_{RET}$', ha='right',
+        ax3.text(6500, 0.025, s=r'$\theta_{RET}$', ha='right',
                  color=fp.def_colors['ret'], va='bottom',
                  transform=ax3.transData, fontsize=7, clip_on=False)
         # # Ticks
@@ -311,7 +311,7 @@ def ret_cases_considered(gs0, firing_tests, theta_ret=0.025):
     asb0 = AnchoredSizeBar(ax0.transData,
                            int(50),
                            '50 ms',
-                           bbox_to_anchor=(0.89, -0.4),
+                           bbox_to_anchor=(0.8, -0.1),
                            bbox_transform=ax0.transAxes,
                            loc=3, fontproperties=fontprops,
                            pad=0., borderpad=.0, sep=2,
@@ -323,7 +323,7 @@ def ret_cases_considered(gs0, firing_tests, theta_ret=0.025):
     asb1 = AnchoredSizeBar(ax1.transData,
                            int(10*100),
                            '10 ms', fontproperties=fontprops,
-                           bbox_to_anchor=(0.9, -0.3),
+                           bbox_to_anchor=(0.8, -0.1),
                            bbox_transform=ax1.transAxes,
                            loc=3,
                            pad=0., borderpad=.0, sep=2,
@@ -334,7 +334,7 @@ def ret_cases_considered(gs0, firing_tests, theta_ret=0.025):
     ymin, ymax = ax2.get_ybound()
     asb2 = AnchoredSizeBar(ax2.transData,
                            int(10*100),
-                           '10 ms', bbox_to_anchor=(0.9, -0.3),
+                           '10 ms', bbox_to_anchor=(0.8, -0.1),
                            bbox_transform=ax2.transAxes,
                            loc=3, fontproperties=fontprops,
                            pad=0., borderpad=.0, sep=2,
@@ -345,7 +345,7 @@ def ret_cases_considered(gs0, firing_tests, theta_ret=0.025):
     ymin, ymax = ax3.get_ybound()
     asb3 = AnchoredSizeBar(ax3.transData,
                            int(10*100),
-                           '10 ms', bbox_to_anchor=(0.9, -0.8),
+                           '10 ms', bbox_to_anchor=(0.8, -0.1),
                            bbox_transform=ax3.transAxes,
                            loc=3, fontproperties=fontprops,
                            pad=0., borderpad=.0, sep=2,
@@ -413,7 +413,7 @@ def fet_cases_considered(gs0, firing_tests, theta_fet):
             make_raster_plot(ax0, ii*3, spk, spikes_offset=0, l_col=l_col)
 
     #  Set limits
-    ax0.set_xlim(0, 2000)
+    ax0.set_xlim(300, 1500)
     ax1.set_xlim(0, end_idx-start_idx)
     ax2.set_xlim(0, end_idx-start_idx)
     ax3.set_xlim(0, end_idx-start_idx)
@@ -448,7 +448,7 @@ def fet_cases_considered(gs0, firing_tests, theta_fet):
     ax0.set_yticks([])
     ax0.spines['left'].set_visible(False)
     # Labels
-    ax0.text(0.05, 0.85, s='Current clamp', transform=ax0.transAxes,
+    ax0.text(0.05, 0.9, s='Current \nclamp', transform=ax0.transAxes,
              ha='left', va='center', color='k', zorder=-1, clip_on=False)
     ax0.set_ylabel('Spikes')
     ax1.set_ylabel('ROS\n(a.u.)')
@@ -478,44 +478,48 @@ def fet_cases_considered(gs0, firing_tests, theta_fet):
     asb0 = AnchoredSizeBar(ax0.transData,
                            int(100),
                            '100 ms', fontproperties=fontprops,
-                           loc=3, bbox_to_anchor=(0.89, -0.3),
+                           loc=3, bbox_to_anchor=(0.8, -0.1),
                            bbox_transform=ax0.transAxes,
                            pad=0., borderpad=.0, sep=2,
                            frameon=False, label_top=False,
                            size_vertical=(ymax-ymin)/1000)
+    asb0.set_clip_on(False)
     ax0.add_artist(asb0)
 
     ymin, ymax = ax1.get_ybound()
     asb1 = AnchoredSizeBar(ax1.transData,
                            int(50*100),
                            '50 ms', fontproperties=fontprops,
-                           loc=3, bbox_to_anchor=(0.9, -0.6),
+                           loc=3, bbox_to_anchor=(0.8, -0.1),
                            bbox_transform=ax1.transAxes,
                            pad=0., borderpad=.0, sep=2,
                            frameon=False, label_top=False,
                            size_vertical=(ymax-ymin)/1000)
+    asb1.set_clip_on(False)
     ax1.add_artist(asb1)
 
     ymin, ymax = ax2.get_ybound()
     asb2 = AnchoredSizeBar(ax2.transData,
                            int(50*100),
                            '50 ms', fontproperties=fontprops,
-                           loc=3, bbox_to_anchor=(0.9, -0.3),
+                           loc=3, bbox_to_anchor=(0.8, -0.1),
                            bbox_transform=ax2.transAxes,
                            pad=0., borderpad=.0, sep=2,
                            frameon=False, label_top=False,
                            size_vertical=(ymax-ymin)/1000)
+    asb2.set_clip_on(False)
     ax2.add_artist(asb2)
 
     ymin, ymax = ax3.get_ybound()
     asb3 = AnchoredSizeBar(ax3.transData,
                            int(50*100),
                            '50 ms', fontproperties=fontprops,
-                           loc=3, bbox_to_anchor=(0.9, -0.5),
+                           loc=3, bbox_to_anchor=(0.8, -0.1),
                            bbox_transform=ax3.transAxes,
                            pad=0., borderpad=.0, sep=2,
                            frameon=False, label_top=False,
                            size_vertical=(ymax-ymin)/1000)
+    asb3.set_clip_on(False)
     ax3.add_artist(asb3)
 
     print('FET')
@@ -541,8 +545,11 @@ def metabolic_signal_plot(gs, theta_ret, theta_fet):
     ax00x, ax00y = ax00.get_xlim()
     ax00.spines['right'].set_color(ll[0].get_color())
     ax00.tick_params(axis='y', colors=ll[0].get_color())
+    ax00.set_ylabel('$\partial$ATP', labelpad=-22)
+    ax00.yaxis.label.set_color(ll[0].get_color())
+    
     ax1.semilogx(bls, ms, lw=0.5,
-                 color='k', label='MS=ROSx$\partial$ATP')
+                 color='k', label='MS=ROS x $\partial$ATP')
     ax1.legend(frameon=True, handlelength=1, loc=9, borderaxespad=0,
                facecolor='white', framealpha=.0, edgecolor='white')
     ax1.plot([10, 100], [theta_ret, theta_ret], lw=0.5,
@@ -555,23 +562,23 @@ def metabolic_signal_plot(gs, theta_ret, theta_fet):
     ax1.text(30, theta_fet, s=r'$\theta_{FET}$', ha='right',
              color=fp.def_colors['fet'], va='center',
              transform=ax1.transData, fontsize=7, clip_on=False)
-    ax0.plot([bls[K_idx], bls[K_idx]],
-             [0, atp_at_min], ls='--', lw=0.5,
-             color='gray', zorder=-1)
-    ax00.plot([bls[K_idx], 2000],
-              [0, 0], ls='--', lw=0.5,
-              color='gray', zorder=-1)
+    # ax0.plot([bls[K_idx], bls[K_idx]],
+    #          [0, atp_at_min], ls='--', lw=0.5,
+    #          color='gray', zorder=-1)
+    # ax00.plot([bls[K_idx], 2000],
+    #           [0, 0], ls='--', lw=0.5,
+    #           color='gray', zorder=-1)
     ax00.set_xlim(ax00x, ax00y)
     ax1.set_xlim(ax00x, ax00y)
     ax0.set_ylim(0, 1)
     ax0.set_yticks([0, 0.5, 1])
-    ax0.set_yticklabels(['0', '', '1'])
-    ax0.set_ylabel('(a.u.)')
+    ax0.set_yticklabels(['0', '0.5', '1'])
+    ax0.set_ylabel('ROS level (a.u.)')
     ax00.spines['top'].set_visible(False)
     ax1.set_ylim([-0.3, 0.3])
     ax1.set_yticks([-0.3, 0, 0.3])
     ax1.set_yticklabels(['-0.3', '0', '0.3'])
-    ax1.set_ylabel('(a.u.)')
+    ax1.set_ylabel('MS (a.u.)')
     lns = lm+ll
     labs = [ll.get_label() for ll in lns]
     ax0.legend(lns, labs, frameon=False, handlelength=0.5,
@@ -600,7 +607,9 @@ def clean_ax(axs):
         ax.spines['bottom'].set_visible(False)
 
 
-def plot_summary(gs, fet_cases, ret_cases):
+def plot_summary(gss, fet_cases, ret_cases):
+    # gs = gss[:, 2]
+    # gsx = gss[3, ]
     filename_prefix_ret = 'refrac_6_rise_0.6'
     filename_prefix_fet = 'iclamp2'
     data = np.load('./spike_compensation/spike_compensate_summary_' +
@@ -615,14 +624,15 @@ def plot_summary(gs, fet_cases, ret_cases):
                                        for cc in range(4)])
     mode_bounds = [0, 1, 2, 3, 4]
     mode_norm = colors.BoundaryNorm(mode_bounds, mode_cmap.N)
-    ax1 = plt.subplot(gs[0, 0])
-    ax1.imshow(mode, origin='lower', cmap=mode_cmap, norm=mode_norm)
+    ax1 = plt.subplot(gs[2, 0])
+    ax1.imshow(mode, origin='lower', aspect='auto',
+               cmap=mode_cmap, norm=mode_norm)
     for ii, case in enumerate(ret_cases):
         if ii > 0:
             xx = np.searchsorted(mito_baseline, case.bl, side='left')
             yy = np.searchsorted(spike_quanta, case.q, side='left')
             ax1.plot(xx, yy, marker='*', clip_on=False,
-                     color=fp.ln_cols_ret[ii], markersize=5,
+                     color=fp.ln_cols_ret[ii], markersize=7,
                      markeredgecolor='k', markeredgewidth=0.3,  zorder=10)
 
     fix_axis_ticks([ax1], mito_baseline, spike_quanta)
@@ -637,16 +647,18 @@ def plot_summary(gs, fet_cases, ret_cases):
                                        for cc in [2, 3, 4]])
     mode_bounds = [2, 3, 4, 5]
     mode_norm = colors.BoundaryNorm(mode_bounds, mode_cmap.N)
-    ax2 = plt.subplot(gs[0, 1])
-    ax2.imshow(mode, origin='lower', cmap=mode_cmap, norm=mode_norm)
+    ax2 = plt.subplot(gs[2, 1])
+    ax2.imshow(mode, origin='lower', aspect='auto',
+               cmap=mode_cmap, norm=mode_norm)
     for ii, case in enumerate(fet_cases):
         if ii < 2:
             xx = np.searchsorted(mito_baseline, case.bl, side='left')
             yy = np.searchsorted(spike_quanta, case.q, side='left')
             ax2.plot(xx, yy, marker='*', clip_on=False,
-                     color=fp.ln_cols_fet[ii], markersize=5,
+                     color=fp.ln_cols_fet[ii], markersize=7,
                      markeredgecolor='k', markeredgewidth=0.3,  zorder=10)
-    cax2 = plt.subplot(gs[1, :2])
+    cax2 = plt.subplot(gs[3, :])
+    # cax2 = plt.subplot(gs[1, :2])
     cbar_labels = ['Continuous', 'Bursting',
                    'Regular', 'Silent',
                    'Adapting']
@@ -659,20 +671,26 @@ def plot_summary(gs, fet_cases, ret_cases):
                                  spacing='proportional',
                                  orientation='horizontal')
     for j, lab in enumerate(cbar_labels):
-        if j == 0:
-            cbar.ax.text(j+1, -8, lab, ha='right',
-                         va='center', rotation=0, clip_on=False)
-        else:
-            cbar.ax.text(j+0.5, -8, lab, ha='center',
-                         va='center', rotation=0, clip_on=False)
+        # if j == 0:
+        #     cbar.ax.text(j+1, -8, lab, ha='right',
+        #                  va='center', rotation=0, clip_on=False)
+        # else:
+        cbar.ax.text(j+0.5, -8, lab, ha='center',
+                     va='center', rotation=0, clip_on=False)
     cbar.ax.set_xticklabels([])
     cbar.ax.tick_params(size=0)
     cbar.outline.set_visible(False)
     fix_axis_ticks([ax2], mito_baseline, spike_quanta)
-    ax2.set_yticklabels([])
+    # ax2.set_yticklabels([])
     ax1.set_ylabel('Per-spike cost (%s)' % kANT_units)
-    ax1.text(0.6, -0.25, 'Non-spiking costs (%s)' % kANT_units,
-             fontsize=7, color='k', transform=ax1.transAxes).set_clip_on(False)
+    ax2.set_ylabel('Per-spike cost (%s)' % kANT_units)
+    ax1.set_xlabel('Non-spiking costs (%s)' % kANT_units,
+                   fontsize=7, color='k')
+    ax2.set_xlabel('Non-spiking costs (%s)' % kANT_units,
+                   fontsize=7, color='k')
+
+    # ax1.text(0.6, -0.25, 'Non-spiking costs (%s)' % kANT_units,
+    #          fontsize=7, color='k', transform=ax1.transAxes).set_clip_on(False)
     return
 
 
@@ -740,20 +758,20 @@ class TestBLCases(object):
         
 if __name__ == '__main__':
     kANT_units = '10$^{-3}$/s'
-    figsize = fp.cm_to_inches([8.9, 15])
+    figsize = fp.cm_to_inches([10, 17])
     fig = plt.figure(figsize=figsize)
     fig.set_constrained_layout_pads(w_pad=0, h_pad=0)
-    gs = gridspec.GridSpec(4, 1, hspace=0.6,
-                           height_ratios=[5, 7, 7, 7.5])
-    gs0 = gridspec.GridSpecFromSubplotSpec(1, 2, wspace=0.5,
-                                           width_ratios=[1, 1],
-                                           subplot_spec=gs[0, 0])
+    gs = gridspec.GridSpec(4, 2, hspace=1,
+                           height_ratios=[2, 5, 2.5, 0.1])
+    # gs0 = gridspec.GridSpecFromSubplotSpec(1, 2, wspace=1,
+    #                                        width_ratios=[1, 1],
+    #                                        subplot_spec=gs[0, :])
     # MS map
-    metabolic_signal_plot(gs0, theta_ret=0.025, theta_fet=-0.05)
+    metabolic_signal_plot(gs, theta_ret=0.025, theta_fet=-0.05)
 
     # # # # ret cases
-    gs1 = gridspec.GridSpecFromSubplotSpec(4, 1, hspace=0.5,
-                                           height_ratios=[1.5, 1, 1, 1],
+    gs1 = gridspec.GridSpecFromSubplotSpec(4, 1,
+                                           height_ratios=[1.25, 1, 1, 1],
                                            subplot_spec=gs[1, 0])
 
     at_min = TestBLCases(bl=30, q=13, test_type='ret',
@@ -770,9 +788,9 @@ if __name__ == '__main__':
     ret_cases_considered(gs1, ret_cases)
 
     # fet cases
-    gs2 = gridspec.GridSpecFromSubplotSpec(4, 1, hspace=0.5,
-                                           height_ratios=[1.5, 1, 1, 1],
-                                           subplot_spec=gs[2, 0])
+    gs2 = gridspec.GridSpecFromSubplotSpec(4, 1,
+                                           height_ratios=[1.25, 1, 1, 1],
+                                           subplot_spec=gs[1, 1])
     at_min = TestBLCases(bl=80, q=13, test_type='fet',
                          align_spike_at=700.0,
                          title_text='80,13')
@@ -782,13 +800,13 @@ if __name__ == '__main__':
     fet_cases = [at_max_q, at_min]
     fet_cases_considered(gs2, fet_cases, theta_fet=-0.05)
 
-    gs3 = gridspec.GridSpecFromSubplotSpec(2, 3, wspace=0.075, hspace=0.6,
-                                           width_ratios=[1, 1, 1],
-                                           height_ratios=[7, 0.5],
-                                           subplot_spec=gs[3, 0])
-    plot_summary(gs3, fet_cases, ret_cases)
+    # gs3 = gridspec.GridSpecFromSubplotSpec(2, 2, hspace=0.6,
+    #                                        width_ratios=[1, 1],
+    #                                        height_ratios=[7, 0.5],
+    #                                        subplot_spec=gs[2, :])
+    plot_summary([gs], fet_cases, ret_cases)
 
     gs.tight_layout(fig)
-    plt.savefig('Figure2.png', dpi=300, transparent=False)
+    plt.savefig('Figure2n.png', dpi=300, transparent=False)
     # plt.show()
 

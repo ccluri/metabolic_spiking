@@ -75,10 +75,26 @@ def ros_ss(ax, ross, cases, atp_bl):
                  fp.def_colors['minisog'],
                  fp.def_colors['aox']]
 
-    ax.plot(bls, these_ros[0], label=cases[0], lw=0.5, c=case_clrs[0])
-    ax.plot(bls, these_ros[1], label=cases[1], lw=0.5, c=case_clrs[1])
-    ax.plot(bls, these_ros[2], label=cases[2], lw=0.5, c=case_clrs[2])
+    xy_leftbox = [1, 0]
+    p = Rectangle(xy_leftbox, bls[48]-0.1, 1, clip_on=False,
+                  edgecolor='none', facecolor='#dcdcdc', alpha=0.5)
+    ax.add_patch(p)
+    xy_leftbox = [bls[72], 0]
+    p = Rectangle(xy_leftbox, bls[-1], 1, clip_on=False,
+                  edgecolor='none', facecolor='#dcdcdc', alpha=0.5)
+    ax.add_patch(p)
+    
+    ax.plot(bls[:49], these_ros[0][:49], lw=0.5, c='k', ls='-.')
+    ax.plot(bls[72:], these_ros[0][72:], lw=0.5, c='k', ls='-.')
+    # ax.plot(bls[:49], these_ros[0][:49], lw=0.7, c='gray', ls=(0, (1, 10)))
+    # ax.plot(bls[72:], these_ros[0][72:], lw=0.7, c='gray', ls=(0, (1, 10)))
+    ax.plot(bls[49:72], these_ros[0][49:72], label=cases[0], lw=0.5, c=case_clrs[0])
+    ax.plot(bls[49:72], these_ros[0][49:72], label=' ', lw=0.5, c='white', alpha=0)
+    ax.plot(bls[49:72], these_ros[1][49:72], label=cases[1], lw=0.5, c=case_clrs[1])
+    ax.plot(bls[49:72], these_ros[2][49:72]-0.05, label=cases[2], lw=0.5, c=case_clrs[2])
 
+
+    
     leg1 = plt.legend(bbox_to_anchor=(-0.4, 0.9, 0.4, 0.2),
                       bbox_transform=ax.transAxes,
                       frameon=False, loc='lower left',
@@ -86,26 +102,39 @@ def ros_ss(ax, ross, cases, atp_bl):
     cnt_ros = ross[0](atp(atp_bl[0]), psi(atp_bl[0]))
     sog_ros = ross[1](atp(atp_bl[0]), psi(atp_bl[0]))
     aox_ros = ross[2](atp(atp_bl[0]), psi(atp_bl[0]))
-
-    ax.plot((atp_bl[0], atp_bl[0]), (0, sog_ros), c='gray', ls='--', lw=0.5)
-    ax.plot((0, atp_bl[0]), (cnt_ros, cnt_ros), c='k', ls='--', lw=0.5)
-    ax.plot((0, atp_bl[0]), (sog_ros, sog_ros),
-            c=fp.def_colors['minisog'], ls='--', lw=0.5)
-    ax.plot((0, atp_bl[0]), (cnt_ros, aox_ros),
-            c=fp.def_colors['aox'], ls='--', lw=0.5)
-
+    sd_ros = ross[0](atp(10), psi(10))
+    
+    # # draw vertical lines
+    # ax.plot((atp_bl[0], atp_bl[0]), (0, sog_ros), c='gray', ls='--', lw=0.5)
+    # ax.plot((10, 10), (0, sd_ros), c=fp.def_colors['SD'],
+    #         ls='--', lw=0.5)
+    # ax.plot((0, atp_bl[0]), (cnt_ros, cnt_ros), c='k', ls='--', lw=0.5)
+    # ax.plot((0, atp_bl[0]), (sog_ros, sog_ros),
+    #         c=fp.def_colors['minisog'], ls='--', lw=0.5)
+    # ax.plot((0, atp_bl[0]), (cnt_ros, aox_ros),
+    #         c=fp.def_colors['aox'], ls='--', lw=0.5)
+    
+    # ax.annotate('', (atp_bl[0], cnt_ros), xytext=(10, cnt_ros),
+    #             textcoords='data', xycoords='data',
+    #             arrowprops=dict(facecolor='black', shrink=0.01),
+    #             horizontalalignment='right', verticalalignment='top')
+    
     ax.plot(atp_bl[0], -0.1, marker='*', c='k', clip_on=False, markersize=7,
             markeredgewidth=0.5, markeredgecolor='none')
-    ax.plot(70, -0.1, marker='*', clip_on=False, markersize=7, c='gold',
+    # ax.plot(70, -0.1, marker='*', clip_on=False, markersize=7, c='gold',
+    #         markeredgecolor='k', markeredgewidth=0.5, zorder=10)
+    ax.plot(70, -0.1, marker='*', clip_on=False, markersize=7, c='#ff8c00',
             markeredgecolor='k', markeredgewidth=0.5, zorder=10)
     ax.plot(10, -0.1, marker='*', clip_on=False, markersize=7,
             c=fp.def_colors['SD'],
             markeredgecolor='k', markeredgewidth=0.5, zorder=10)
+
     ax.set_ylim(-0.1, 1.1)
     ax.set_yticks([0., .5, 1])
     ax.set_xscale('log')
     ax.set_xlabel('Non-spiking costs (%s)' % kANT_units)
     ax = fp.add_logticks(ax)
+    ax.tick_params(axis='x', which='major', pad=3)
     ax.set_ylabel(r'ROS level (a.u.)')
     plt.gca().add_artist(leg1)
     return ax
@@ -132,7 +161,8 @@ def voltage_trace(ax, ff_sleep=0.7, ff_awake=0):
         ikas_awake[i] = I_KA(y[i-1], aj[i], bj[i], cj[i], f=ff_awake)
         ikas_sleep[i] = I_KA(y[i-1], aj[i], bj[i], cj[i], f=ff_sleep)
     norm_max = max(max(ikas_awake), max(ikas_sleep))
-    ax.plot(t, ikas_awake/norm_max, lw=0.5, color='gold', label='Inactivating')
+    # ax.plot(t, ikas_awake/norm_max, lw=0.5, color='gold', label='Inactivating')
+    ax.plot(t, ikas_awake/norm_max, lw=0.5, color='#ff8c00', label='Inactivating')
     ax.plot(t, ikas_sleep/norm_max, lw=0.5, color='k',
             label='Non inactivating')
     ax.legend(frameon=False, loc=9, ncol=1, handlelength=0.7)
@@ -235,7 +265,8 @@ def plot_membpot(ax, ff, clamp, t, mem_pots_dict):
     y = mem_pots_dict[clamp]
     if ff == 0:
         label = 'Inactivating'
-        color = 'gold'
+        # color = 'gold'
+        color = '#ff8c00'
         axs = True
     else:
         label = 'Non inactivating'

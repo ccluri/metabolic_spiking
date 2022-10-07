@@ -63,7 +63,10 @@ def summary_spikes(total_neurons, sim_time, times, nidx, M, dict_key,
     gs0 = gridspec.GridSpecFromSubplotSpec(1, 4, wspace=0.4, hspace=0.3,
                                            width_ratios=[1, 1, 1, 1],
                                            subplot_spec=gs[5, :])
-    gs1 = gridspec.GridSpecFromSubplotSpec(1, 3, wspace=0.4, hspace=0.,
+    # gs1 = gridspec.GridSpecFromSubplotSpec(1, 4, wspace=0.4, hspace=0.3,
+    #                                        width_ratios=[1, 1, 1, 1],
+    #                                        subplot_spec=gs[6, :])
+    gs1 = gridspec.GridSpecFromSubplotSpec(1, 3, wspace=0.4, hspace=0,
                                            width_ratios=[1, 1, 1],
                                            subplot_spec=gs[6, :])
     ax4 = plt.subplot(gs0[0, 0])  # Average fr
@@ -74,6 +77,8 @@ def summary_spikes(total_neurons, sim_time, times, nidx, M, dict_key,
     ax8 = plt.subplot(gs1[0, 0])  # Avalanches time
     ax9 = plt.subplot(gs1[0, 1])  # Avalanches pop
     ax91 = plt.subplot(gs1[0, 2])  # Avalanches space
+    # ax10 = plt.subplot(gs1[0, 2])  # ISI vs FR
+    # ax11 = plt.subplot(gs1[0, 3])  # ISI_n vs ISI_n+1
     times_zoom = times[np.logical_and((times >= start_time),
                                       (times < end_time))]
     nidx_zoom = nidx[np.logical_and((times >= start_time), (times < end_time))]
@@ -345,18 +350,49 @@ def summary_spikes(total_neurons, sim_time, times, nidx, M, dict_key,
     ax9.set_ylabel('P(S)', loc='top', rotation=0, labelpad=-12)
     ax9.set_xticks([1, 100, 10000, 1000000])
     ax9.set_ylim([2*10**-7, 2*10**0])
-    #ax9.set_yticks([10**-4, 10**-2, 10**0])
 
+    # # Plot ISI vs FR, ISI(n) vs ISI(n+1)
+    # frate_sh = opt_dicts[1]['avg_fr']
+    # train_isi_sh = opt_dicts[1]['train_isi']
+    # inds_sh = np.argsort(frate_sh)
+
+    # all_spikes_x = []
+    # all_spikes_y = []
+    # th = []
+    # ys = []
+    # for ii in range(10000):
+    #     tt = train_isi[inds_sh[9999-ii]]
+    #     th.append(tt)
+    #     ys.append([ii]*len(tt))
+    #     all_spikes_x.append(train_isi_sh[ii][:-1])
+    #     all_spikes_y.append(train_isi_sh[ii][1:])
+    # th = np.hstack(th)
+    # ys = np.hstack(ys)
+    # all_spikes_x = np.hstack(all_spikes_x)
+    # all_spikes_y = np.hstack(all_spikes_y)
+    # ax10.scatter(th, ys, c='k', marker=',',
+    #              alpha=0.025, s=0.08)
+    # ax10.set_xscale('log')
+    # ax10.set_xlabel('ISI (ms)')
+    # ax10.set_ylabel('Neuron idx')
+    # ax11.scatter(all_spikes_x, all_spikes_y, c='k',
+    #              alpha=0.025, s=0.08, marker=',')
+    # ax11.set_xscale('log')
+    # ax11.set_yscale('log')
+    # ax11.set_xlabel(r'ISI$_n$ (ms)')
+    # ax11.set_ylabel(r'ISI$_(n+1)$ (ms)')
+
+    
     avaln_s = opt_dicts[1]['avalns']
     avaln_t = opt_dicts[1]['avalns_t']
+    
     # logx = np.log10(avaln_t)
     # logy = np.log10(avaln_s)
     # coeffs = np.polyfit(logx, logy, deg=3)
     # poly = np.poly1d(coeffs)
     # yfit = lambda x: 10**(poly(np.log(x)))
     # ax91.loglog(avaln_t, yfit(avaln_t), lw=0.5, color='k')
-    ax91.loglog(avaln_t, avaln_s, color='k', markersize=1, marker='o',
-                linestyle='None')
+    
     # slope = opt_dicts[1]['beta_fit'][0]
     # intercept = opt_dicts[1]['beta_fit'][1]
     # test_pts = [1, 1000]
@@ -366,19 +402,26 @@ def summary_spikes(total_neurons, sim_time, times, nidx, M, dict_key,
     #           horizontalalignment='left',
     #           verticalalignment='center',
     #           transform=ax91.transAxes, color='k')
+
+    ax91.loglog(avaln_t, avaln_s, color='k', markersize=1, marker='o',
+                linestyle='None')
     ax91.set_ylabel('Avalanche size')
     ax91.set_xlabel('Avalanche dur.\n(ms)')
     ax91.set_xticks([1, 10, 100, 1000])
     ax91.set_yticks([1, 100, 10000, 1000000])
+
     # ax9.set_xticks([1, 100, 10000, 1000000])
     # ax9.set_ylim([2*10**-7, 2*10**0])
     # ax9.set_yticks([10**-4, 10**-2, 10**0])
     # ax3c.plot([0, 100], [0, 100])
-    gs.tight_layout(fig)    
+
+    gs.tight_layout(fig)
     align_axis_labels([ax4, ax5, ax6, ax7], axis='x', value=-0.3)
     # align_axis_labels([ax8, ax9, ax91], axis='x', value=-0.5)
     neat_axs([ax0, ax1, ax2, ax3, ax3c,
               ax4, ax5, ax6, ax7, ax8, ax9, ax91])
+    # neat_axs([ax0, ax1, ax2, ax3, ax3c,
+    #           ax4, ax5, ax6, ax7, ax8, ax9, ax10, ax11])  # ax91])
 
     if len(filename) > 0:
         plt.savefig(filename, dpi=300)
