@@ -89,8 +89,10 @@ def summary_spikes(total_neurons, sim_time, times, nidx, M, dict_key,
     norm_1 = colors.BoundaryNorm(bounds, cmap_.N, clip=True)
     im = ax2.scatter(times_zoom, nidx_zoom, c=M_zoom, cmap=cmap_, s=1,
                      linewidth=0.1, edgecolor='k', norm=norm_1)
+    # ax2.plot([0, sim_time/2/ms], [4050, 4050],
+    #          lw=2, c='gold', zorder=10)
     ax2.plot([0, sim_time/2/ms], [4050, 4050],
-             lw=2, c='gold', zorder=10)
+             lw=2, c='#e6ab02', zorder=10)
     ax2.plot([sim_time/2/ms, sim_time/ms], [4050, 4050],
              lw=2, c='k', zorder=10)
     cax = inset_axes(ax2, width='100%', height='100%',
@@ -149,8 +151,10 @@ def summary_spikes(total_neurons, sim_time, times, nidx, M, dict_key,
                           size_vertical=(ymax-ymin)/1000)
     ax0.add_artist(asb)
     ax0.set_ylabel('Pop. act. (Hz)')
+    # ax0.plot([0, sim_time/2/ms], [0.02, 0.02],
+    #          lw=1.5, c='gold')
     ax0.plot([0, sim_time/2/ms], [0.02, 0.02],
-             lw=1.5, c='gold')
+             lw=1.5, c='#e6ab02')
     ax0.text(sim_time/4/ms, 0.03, s='Poisson input (3Hz)',
              color='k', va='center', ha='center')
     ax0.plot([sim_time/2/ms, sim_time/ms], [0.02, 0.02], lw=1.5, c='k')
@@ -248,10 +252,13 @@ def summary_spikes(total_neurons, sim_time, times, nidx, M, dict_key,
     if opt_dicts:
         Nfh, B = np.histogram(np.array(avg_fr_fh), bins=np.linspace(0, 40, 41))
         Nsh, B = np.histogram(np.array(avg_fr_sh), bins=np.linspace(0, 40, 41))
-        ax4.plot(B[:-1], Nfh / np.sum(Nfh), c='gold', lw=.75)
+        # ax4.plot(B[:-1], Nfh / np.sum(Nfh), c='gold', lw=.75)
+        ax4.plot(B[:-1], Nfh / np.sum(Nfh), c='#e6ab02', lw=.75)
         ax4.plot(B[:-1], Nsh / np.sum(Nsh), c='k', lw=0.75)
+        # ax4.plot((np.mean(avg_fr_fh)*Hz, np.mean(avg_fr_fh)*Hz),
+        #          (0, np.max(N)/np.sum(N)), c='gold', lw=.75, ls='--')
         ax4.plot((np.mean(avg_fr_fh)*Hz, np.mean(avg_fr_fh)*Hz),
-                 (0, np.max(N)/np.sum(N)), c='gold', lw=.75, ls='--')
+                 (0, np.max(N)/np.sum(N)), c='#e6ab02', lw=.75, ls='--')
         ax4.plot((np.mean(avg_fr_sh)*Hz, np.mean(avg_fr_sh)*Hz),
                  (0, np.max(N)/np.sum(N)), c='k', lw=.75, ls='--')
     ax4.set_xlabel('Avg firing rate(Hz)')
@@ -267,10 +274,13 @@ def summary_spikes(total_neurons, sim_time, times, nidx, M, dict_key,
     if opt_dicts:
         Nfh, B = np.histogram(all_isi_fh, bins=np.logspace(0, 3.1, 30))
         Nsh, B = np.histogram(all_isi_sh, bins=np.logspace(0, 3.1, 30))
-        ax5.plot(B[:-1], Nfh / np.sum(Nfh), c='gold', lw=.75)
+        # ax5.plot(B[:-1], Nfh / np.sum(Nfh), c='gold', lw=.75)
+        ax5.plot(B[:-1], Nfh / np.sum(Nfh), c='#e6ab02', lw=.75)
         ax5.plot(B[:-1], Nsh / np.sum(Nsh), c='k', lw=.75)
+        # ax5.plot((np.mean(all_isi_fh), np.mean(all_isi_fh)),
+        #          (0, np.max(N)/np.sum(N)), c='gold', lw=.75, ls='--')
         ax5.plot((np.mean(all_isi_fh), np.mean(all_isi_fh)),
-                 (0, np.max(N)/np.sum(N)), c='gold', lw=.75, ls='--')
+                 (0, np.max(N)/np.sum(N)), c='#e6ab02', lw=.75, ls='--')
         ax5.plot((np.mean(all_isi_sh), np.mean(all_isi_sh)),
                  (0, np.max(N)/np.sum(N)), c='k', lw=.75, ls='--')
     ax5.set_xscale('symlog')
@@ -283,10 +293,14 @@ def summary_spikes(total_neurons, sim_time, times, nidx, M, dict_key,
     if opt_dicts:
         Nfh, B = np.histogram(cvs_fh, bins=np.linspace(0, 3, 30))
         Nsh, B = np.histogram(cvs_sh, bins=np.linspace(0, 3, 30))
-        ax6.plot(B[:-1], Nfh / np.sum(Nfh), c='gold', lw=0.75)
+        # ax6.plot(B[:-1], Nfh / np.sum(Nfh), c='gold', lw=0.75)
+        ax6.plot(B[:-1], Nfh / np.sum(Nfh), c='#e6ab02', lw=0.75)
         ax6.plot(B[:-1], Nsh / np.sum(Nsh), c='k', lw=0.75)
+        # ax6.plot((np.mean(cvs_fh), np.mean(cvs_fh)),
+        #          (0, np.max(N)/np.sum(N)), c='gold',
+        #          lw=0.75, ls='--')
         ax6.plot((np.mean(cvs_fh), np.mean(cvs_fh)),
-                 (0, np.max(N)/np.sum(N)), c='gold',
+                 (0, np.max(N)/np.sum(N)), c='#e6ab02',
                  lw=0.75, ls='--')
         ax6.plot((np.mean(cvs_sh), np.mean(cvs_sh)),
                  (0, np.max(N)/np.sum(N)), c='k',
@@ -302,11 +316,15 @@ def summary_spikes(total_neurons, sim_time, times, nidx, M, dict_key,
     if opt_dicts:
         Mfh, B = np.histogram(opt_dicts[2], bins=np.linspace(-2, 1, 31))
         Msh, B = np.histogram(opt_dicts[3], bins=np.linspace(-2, 1, 31))
-        ax7.plot(B[:-1], Mfh / sum(Mfh), c='gold', lw=0.75)
+        # ax7.plot(B[:-1], Mfh / sum(Mfh), c='gold', lw=0.75)
+        ax7.plot(B[:-1], Mfh / sum(Mfh), c='#e6ab02', lw=0.75)
         ax7.plot(B[:-1], Msh / sum(Msh), c='k', lw=0.75)
+        # ax7.plot((np.mean(opt_dicts[2]),
+        #           np.mean(opt_dicts[2])), (0, np.max(N)/np.sum(N)),
+        #          c='gold', lw=0.75, ls='--')
         ax7.plot((np.mean(opt_dicts[2]),
                   np.mean(opt_dicts[2])), (0, np.max(N)/np.sum(N)),
-                 c='gold', lw=0.75, ls='--')
+                 c='#e6ab02', lw=0.75, ls='--')
         ax7.plot((np.mean(opt_dicts[3]),
                   np.mean(opt_dicts[3])), (0, np.max(N)/np.sum(N)),
                  c='k', lw=0.75, ls='--')
@@ -323,7 +341,9 @@ def summary_spikes(total_neurons, sim_time, times, nidx, M, dict_key,
                        linestyle='None')
     fits_t_sh.power_law.plot_pdf(ax=ax8, lw=0.5, color='k')
     fits_t_fh = opt_dicts[0]['fit_t']
-    fits_t_fh.plot_pdf(ax=ax8, color='gold', markersize=1,
+    # fits_t_fh.plot_pdf(ax=ax8, color='gold', markersize=1,
+    #                    marker='o')
+    fits_t_fh.plot_pdf(ax=ax8, color='#e6ab02', markersize=1,
                        marker='o')
     ax8.text(0.6, 0.95, s=r'$\alpha_{D}=$'+str(opt_dicts[1]['talpha'])[:4],
              horizontalalignment='center',
@@ -340,7 +360,9 @@ def summary_spikes(total_neurons, sim_time, times, nidx, M, dict_key,
                      linestyle='None')
     fits_sh.power_law.plot_pdf(ax=ax9, lw=0.5, color='k')
     fits_fh = opt_dicts[0]['fit_s']
-    fits_fh.plot_pdf(ax=ax9, color='gold', markersize=1,
+    # fits_fh.plot_pdf(ax=ax9, color='gold', markersize=1,
+    #                  marker='o')
+    fits_fh.plot_pdf(ax=ax9, color='#e6ab02', markersize=1,
                      marker='o')
     ax9.text(0.6, 0.95, s=r'$\alpha_{S}=$'+str(opt_dicts[1]['palpha'])[:4],
              horizontalalignment='center',

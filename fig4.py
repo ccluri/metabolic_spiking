@@ -99,8 +99,10 @@ def upper_run(axs, axs_meta, mito_baseline, spike_quanta):
              c=fp.def_colors['park1'], lw=0.25)
     ax3.plot(t, r_cell_typ2.out['v'],
              c=fp.def_colors['park2'], lw=0.25)
+    # ax4.plot(t, r_cell_typ3.out['v'],
+    #          c='gold', lw=0.35)
     ax4.plot(t, r_cell_typ3.out['v'],
-             c='gold', lw=0.35)
+             c='#e6ab02', lw=0.35)
 
     ax1_m.plot(t, r_cell_cntrl.out['atp'],
                c=fp.def_colors['atp'], lw=0.5, label='ATP')
