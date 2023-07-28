@@ -10,9 +10,9 @@ After this, please activate this specific python environment by
       user@computer:~/metabolic_spiking$ source activate py36
       (py36)user@computer:~/metabolic_spiking$
 
-## Generate figures from the paper -
-bioarxiv preprint (https://www.biorxiv.org/content/10.1101/2022.10.16.512428v1)
-DOI: https://doi.org/10.1101/2022.10.16.512428
+## Generate figures from the paper submitted to PNAS for review
+This is very similar to that submitted to bioarxiv but, the PD version is now in supps. So the figure numbering is messed up and will be corrected in the subsequent versions.
+
 
 |Figure in MS|.odg file /  |.py file|
 |------------|-----------|--------|
@@ -21,15 +21,15 @@ DOI: https://doi.org/10.1101/2022.10.16.512428
 | Figure 3 | /figure_odgs/Figure2.odg| fig2_v6_2.py |
 | Figure 4 | /figure_odgs/Figure3.odg| fig3_dfb.py |
 | Figure 5 | /figure_odgs/Figure3.odg| fig3_nw.py |
-| Figure 6 | /figure_odgs/Figure4.odg| fig4.py |
-| Figure 7 | /figure_odgs/Figure5_supp.odg| fig_predictions.py |
+| Figure 6 | /figure_odgs/Figure5_supp.odg| fig_predictions.py |
 | Figure S1 |/figure_odgs/Figure1_supp.odg| fig1_supp.py |
 | Figure S2 |/figure_odgs/Figure1_supp.odg| fig1_supp_b.py |
 | Figure S3 |/figure_odgs/Figure2_supp.odg| fig2_supp.py |
 | Figure S4 |/figure_odgs/Figure3_supp.odg| fig3_nw_supp.py |
-| Figure S5 |/figure_odgs/Figure4_supp.odg| -NA- |
-| Figure S6 |/figure_odgs/Figure6_supp.odg| -NA- |
+| Figure S5 | /figure_odgs/Figure4.odg| fig4.py |
+| Figure S6 |/figure_odgs/Figure4_supp.odg| -NA- |
 | Figure S7 |/figure_odgs/Figure6_supp.odg| -NA- |
+| Figure S8 |/figure_odgs/Figure6_supp.odg| -NA- |
 
 
 ### Figures 1, S1 and S2 from the MS
@@ -100,7 +100,7 @@ These commands will produce as many files with the summary data as pickles (./ne
 
 When the above is run for the first time, the summary values are calculated and dumped into a .npz file, which is used for the subsequent figure generation calls. In the end, you will have Figure3_nw_supp.png file in your folder.
 
-### Figure 6
+### Figure S5 (PD figure)
 
 Please run the following command
 
