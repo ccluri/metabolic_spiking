@@ -158,7 +158,7 @@ class Mito(object):
         self.dnaddt = (-self.v2 - self.v4 - 2*self.v5 + self.vr)*e5
         self.datpdt = (self.vatp - self.vant + self.v5 - self.v7)*e6
         self.ddpsidt = (10*self.vr - self.vl - 3*self.vatp - self.vant)*e7
-        self.dFkantdt = erf(10*(self.atp - self.atpc))/0.05
+        self.dFkantdt = erf(10*(self.atp - self.atpc))/0.1
         
     def update_vals(self, dt, atp_cost=0, leak_cost=0):
         taum = dtm*dt  # scaling

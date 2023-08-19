@@ -64,7 +64,7 @@ def ret_run_sim(case, theta_ret=0.025):
     t = np.arange(0, time, dt)
     qdur = 1000
     qtime = np.arange(0, qdur, dt)
-    this_q = Q_nak(qtime, spike_quanta)
+    this_q = Q_nak(qtime, fact=1, tau_rise=5)
     qlen = len(this_q)
     ros = get_ros()
     # Mitochondria
@@ -72,7 +72,8 @@ def ret_run_sim(case, theta_ret=0.025):
     mi.steadystate_vals(time=1000)
     ros.init_val(mi.atp, mi.psi)
     r_mito = Recorder(mi, ['atp', 'psi'], time, dt)
-    spike_expns = np.zeros_like(t)
+    spike_expns = np.zeros_like(t) + mi.atp
+    leak_expns = np.zeros_like(t)
     ros_vals = np.zeros_like(t)
     ms_vals = np.zeros_like(t)
     spikes = []  # fake spikes
@@ -82,8 +83,9 @@ def ret_run_sim(case, theta_ret=0.025):
     for i in range(len(t)):
         mi.update_vals(dt,
                        atp_cost=spike_expns[i],
-                       leak_cost=spike_expns[i]*psi_fac)
-        ros.update_vals(dt, mi.atp, mi.psi, spike_expns[i]+mito_baseline)
+                       leak_cost=leak_expns[i])
+        ros.update_vals(dt, mi.atp, mi.psi,
+                        mi.k_ant*1000)
         ros_vals[i] = ros.get_val()
         msig = ros.get_val()*(mi.atp - 0.71218258)
         ms_vals[i] = msig
@@ -96,9 +98,11 @@ def ret_run_sim(case, theta_ret=0.025):
             elapsed = 0
             spikes.append(t[i])
             try:
-                spike_expns[i:i+qlen] += this_q
+                spike_expns[i:i+qlen] -= this_q*spike_quanta
+                leak_expns[i:i+qlen] += this_q*psi_fac*spike_quanta
             except ValueError:
-                spike_expns[i:] += this_q[:len(spike_expns[i:])]
+                spike_expns[i:] -= this_q[:len(spike_expns[i:])]*spike_quanta
+                leak_expns[i:] += this_q[:len(leak_expns[i:])]*psi_fac*spike_quanta
         else:
             if elapsed < refrac:
                 elapsed += dt
@@ -128,7 +132,7 @@ def fet_run_sim(case, iclamp=2, theta_fet=-0.025):
     #  Spike costs
     qdur = 1000
     qtime = np.arange(0, qdur, dt)
-    this_q = Q_nak(qtime, spike_quanta)
+    this_q = Q_nak(qtime, fact=1, tau_rise=5)
     qlen = len(this_q)
     #  Mitochondria
     mi = Mito(baseline_atp=mito_baseline)
@@ -138,7 +142,8 @@ def fet_run_sim(case, iclamp=2, theta_fet=-0.025):
     ros = get_ros()
     ros.init_val(mi.atp, mi.psi)
     # Init vars
-    spike_expns = np.zeros_like(t)
+    spike_expns = np.zeros_like(t) + mi.atp
+    leak_expns = np.zeros_like(t)
     ros_vals = np.zeros_like(t)
     ms_vals = np.zeros_like(t)
     spikes = []  # fake spikes
@@ -148,8 +153,9 @@ def fet_run_sim(case, iclamp=2, theta_fet=-0.025):
     for i in range(len(t)):
         mi.update_vals(dt,
                        atp_cost=spike_expns[i],
-                       leak_cost=spike_expns[i]*psi_fac)
-        ros.update_vals(dt, mi.atp, mi.psi, spike_expns[i]+mito_baseline)
+                       leak_cost=leak_expns[i])
+        ros.update_vals(dt, mi.atp, mi.psi,
+                        mi.k_ant*1000)
         ros_vals[i] = ros.get_val()
         msig = ros.get_val()*(mi.atp - 0.71218258)
         ms_vals[i] = msig
@@ -162,9 +168,11 @@ def fet_run_sim(case, iclamp=2, theta_fet=-0.025):
             elapsed = 0
             spikes.append(t[i])
             try:
-                spike_expns[i:i+qlen] += this_q
+                spike_expns[i:i+qlen] -= this_q*spike_quanta
+                leak_expns[i:i+qlen] += this_q*psi_fac*spike_quanta
             except ValueError:
-                spike_expns[i:] += this_q[:len(spike_expns[i:])]
+                spike_expns[i:] -= this_q[:len(spike_expns[i:])]*spike_quanta
+                leak_expns[i:] += this_q[:len(leak_expns[i:])]*psi_fac*spike_quanta
         else:
             if elapsed < max(isi_min, refrac) or msig < theta_fet:
                 elapsed += dt
@@ -243,26 +251,26 @@ def ret_cases_considered(gs0, firing_tests, theta_ret=0.025):
             make_raster_plot(ax0, ii*3, spk, spikes_offset, l_col)
     #  Set limits
     if case.start is not False:
-        ax0.set_xlim(case.start-25, 875)
+        ax0.set_xlim(case.start-25, 1100)
 
         ax1.set_xlim(0, end_idx-start_idx)
         ax2.set_xlim(0, end_idx-start_idx)
         ax3.set_xlim(0, end_idx-start_idx)
 
-        ax1.set_ylim(0.13, 0.18)
-        ax2.set_ylim(0.81, 0.87)
-        ax3.set_ylim(0.018, 0.027)
-        ax3.plot([0, 20000], [theta_ret, theta_ret], lw=0.5, ls='--',
+        ax1.set_ylim(0.05, 0.18)
+        ax2.set_ylim(0.73, 0.87)
+        ax3.set_ylim(0.003, 0.027)
+        ax3.plot([0, 30000], [theta_ret, theta_ret], lw=0.5, ls='--',
                  color=fp.def_colors['ret'], zorder=-11)
-        ax3.text(6500, 0.025, s=r'$\theta_{RET}$', ha='right',
+        ax3.text(8500, 0.025, s=r'$\theta_{RET}$', ha='right',
                  color=fp.def_colors['ret'], va='bottom',
                  transform=ax3.transData, fontsize=7, clip_on=False)
         # # Ticks
         ax0.set_yticks([])
         ax0.spines['left'].set_visible(False)
-        ax1.set_yticks([0.13, 0.18])
-        ax2.set_yticks([0.81, 0.87])
-        ax3.set_yticks([0.018, 0.027])
+        ax1.set_yticks([0.05, 0.18])
+        ax2.set_yticks([0.73, 0.9])
+        ax3.set_yticks([0.003, 0.033])
         ax1.ticklabel_format(axis='y',
                              style='sci', scilimits=(0, 0))
         ax2.ticklabel_format(axis='y',
@@ -422,13 +430,13 @@ def fet_cases_considered(gs0, firing_tests, theta_fet):
     ax3.text(60000, theta_fet, s=r'$\theta_{FET}$', ha='right',
              color=fp.def_colors['fet'], va='top',
              transform=ax3.transData, fontsize=7, clip_on=False)
-    ax1.set_ylim(0.07, 0.22)
-    ax2.set_ylim(0.3, 0.7)
-    ax3.set_ylim(-0.08, 0.00)
+    # ax1.set_ylim(0.07, 0.22)
+    # ax2.set_ylim(0.3, 0.7)
+    # ax3.set_ylim(-0.08, 0.00)
     # # Ticks
-    ax1.set_yticks([0.07, 0.22])
-    ax2.set_yticks([.3, .7])
-    ax3.set_yticks([-0.08, 0])
+    # ax1.set_yticks([0.07, 0.22])
+    # ax2.set_yticks([.3, .7])
+    # ax3.set_yticks([-0.08, 0])
     ax1.ticklabel_format(axis='y',
                          style='sci', scilimits=(0, 0))
     ax2.ticklabel_format(axis='y',
@@ -610,7 +618,7 @@ def clean_ax(axs):
 def plot_summary(gss, fet_cases, ret_cases):
     # gs = gss[:, 2]
     # gsx = gss[3, ]
-    filename_prefix_ret = 'refrac_6_rise_0.6'
+    filename_prefix_ret = 'refrac_6_rise_5.0'
     filename_prefix_fet = 'iclamp2'
     data = np.load('./spike_compensation/spike_compensate_summary_' +
                    filename_prefix_ret + '.npz')
@@ -735,7 +743,7 @@ def single_run(case):
 
 
 class TestBLCases(object):
-    def __init__(self, bl, q, psi_fac=1e-5, refrac=6,
+    def __init__(self, bl, q, psi_fac=1e-3, refrac=6,
                  align_spike_at=None,
                  title_text='', test_type='fet'):
         self.bl = bl
@@ -751,7 +759,7 @@ class TestBLCases(object):
                 self.end = self.start + 800
             else:
                 self.start = align_spike_at - 25
-                self.end = self.start + 200
+                self.end = self.start + 300
         self.title_text = title_text
         self.test_type = test_type
 
@@ -769,44 +777,39 @@ if __name__ == '__main__':
     # MS map
     metabolic_signal_plot(gs, theta_ret=0.025, theta_fet=-0.05)
 
-    # # # # ret cases
+    # # # # # ret cases
     gs1 = gridspec.GridSpecFromSubplotSpec(4, 1,
                                            height_ratios=[1.25, 1, 1, 1],
                                            subplot_spec=gs[1, 0])
 
-    at_min = TestBLCases(bl=30, q=13, test_type='ret',
-                         align_spike_at=590.86,
-                         title_text='30,13')
-    at_min_bl = TestBLCases(bl=30, q=2, test_type='ret',
-                            align_spike_at=533.97,
-                            title_text='30,2')
-    at_min_bl_fast = TestBLCases(bl=30, q=2, test_type='ret',
+    at_min = TestBLCases(bl=30, q=0.08, test_type='ret',
+                         align_spike_at=622.82,
+                         title_text='30,0.08')
+    at_min_bl = TestBLCases(bl=30, q=0.03, test_type='ret',
+                            align_spike_at=540.33,
+                            title_text='30,0.03')
+    at_min_bl_fast = TestBLCases(bl=30, q=0.03, test_type='ret',
                                  refrac=2,
-                                 align_spike_at=576.4300000000001,
-                                 title_text='30,2')
+                                 align_spike_at=671.3,
+                                 title_text='30,0.03')
     ret_cases = [at_min_bl_fast, at_min_bl, at_min]
     ret_cases_considered(gs1, ret_cases)
 
-    # fet cases
+    # # # # fet cases
     gs2 = gridspec.GridSpecFromSubplotSpec(4, 1,
                                            height_ratios=[1.25, 1, 1, 1],
                                            subplot_spec=gs[1, 1])
-    at_min = TestBLCases(bl=80, q=13, test_type='fet',
+    at_min = TestBLCases(bl=70, q=0.08, test_type='fet',
                          align_spike_at=700.0,
                          title_text='80,13')
-    at_max_q = TestBLCases(bl=80, q=30, test_type='fet',
+    at_max_q = TestBLCases(bl=70, q=0.15, test_type='fet',
                            align_spike_at=700.0,
                            title_text='80,30')
     fet_cases = [at_max_q, at_min]
     fet_cases_considered(gs2, fet_cases, theta_fet=-0.05)
 
-    # gs3 = gridspec.GridSpecFromSubplotSpec(2, 2, hspace=0.6,
-    #                                        width_ratios=[1, 1],
-    #                                        height_ratios=[7, 0.5],
-    #                                        subplot_spec=gs[2, :])
     plot_summary([gs], fet_cases, ret_cases)
 
     gs.tight_layout(fig)
     plt.savefig('Figure2n.png', dpi=300, transparent=False)
-    # plt.show()
-
+    #plt.show()

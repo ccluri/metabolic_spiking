@@ -5,7 +5,7 @@ from gates import get_ros
 from utils import Recorder, Q_nak
 
 
-def fet_run_sim(mito_baseline, spike_quanta, psi_fac=0.1e-4, refrac=6,
+def fet_run_sim(mito_baseline, spike_quanta, psi_fac=1e-3, refrac=6,
                 iclamp=2, theta_fet=-0.025):
     print('Baseline : ', mito_baseline, 'Quanta :', spike_quanta)
     print('Psi factor: ', psi_fac, 'Refrac :', refrac, 'I clamp :', iclamp)
@@ -22,7 +22,7 @@ def fet_run_sim(mito_baseline, spike_quanta, psi_fac=0.1e-4, refrac=6,
     #  Spike costs
     qdur = 1000
     qtime = np.arange(0, qdur, dt)
-    this_q = Q_nak(qtime, spike_quanta)
+    this_q = Q_nak(qtime, fact=1, tau_rise=5)
     qlen = len(this_q)
     #  Mitochondria
     mi = Mito(baseline_atp=mito_baseline)
@@ -32,7 +32,8 @@ def fet_run_sim(mito_baseline, spike_quanta, psi_fac=0.1e-4, refrac=6,
     ros = get_ros()
     ros.init_val(mi.atp, mi.psi)
     # Init vars
-    spike_expns = np.zeros_like(t)
+    spike_expns = np.zeros_like(t) + mi.atp
+    leak_expns = np.zeros_like(t)
     ros_vals = np.zeros_like(t)
     ms_vals = np.zeros_like(t)
     spikes = []  # fake spikes
@@ -42,8 +43,9 @@ def fet_run_sim(mito_baseline, spike_quanta, psi_fac=0.1e-4, refrac=6,
     for i in range(len(t)):
         mi.update_vals(dt,
                        atp_cost=spike_expns[i],
-                       leak_cost=spike_expns[i]*psi_fac)
-        ros.update_vals(dt, mi.atp, mi.psi, spike_expns[i]+mito_baseline)
+                       leak_cost=leak_expns[i])
+        ros.update_vals(dt, mi.atp, mi.psi,
+                        mi.k_ant*1000)
         ros_vals[i] = ros.get_val()
         msig = ros.get_val()*(mi.atp - 0.71218258)
         ms_vals[i] = msig
@@ -56,9 +58,11 @@ def fet_run_sim(mito_baseline, spike_quanta, psi_fac=0.1e-4, refrac=6,
             elapsed = 0
             spikes.append(t[i])
             try:
-                spike_expns[i:i+qlen] += this_q
+                spike_expns[i:i+qlen] -= this_q*spike_quanta
+                leak_expns[i:i+qlen] += this_q*psi_fac*spike_quanta
             except ValueError:
-                spike_expns[i:] += this_q[:len(spike_expns[i:])]
+                spike_expns[i:] -= this_q[:len(spike_expns[i:])]*spike_quanta
+                leak_expns[i:] += this_q[:len(leak_expns[i:])]*psi_fac*spike_quanta
         else:
             if elapsed < max(isi_min, refrac) or msig < theta_fet:
                 elapsed += dt
@@ -106,7 +110,7 @@ def fetch_isi(iclamp):
 
     
 def mega_run_fet(filename_prefix='', ros_baseline=False):
-    test_spike_quants = np.logspace(-0.15, 1.75, 10)
+    test_spike_quants = np.logspace(-2.5, -0.5, 10)  # np.logspace(-0.15, 1.75, 10)
     test_bls_vals = np.linspace(60, 160, 10)
     QQ = len(test_spike_quants)
     BB = len(test_bls_vals)

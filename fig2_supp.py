@@ -267,7 +267,7 @@ if __name__ == '__main__':
                                                            0.9],
                                             subplot_spec=gs[0, :])
 
-    plot_summary_ret(gs00, filename_prefix_ret='refrac_6_rise_0.6')
+    plot_summary_ret(gs00, filename_prefix_ret='refrac_6_rise_5.0')
     plot_summary_fet(gs00, filename_prefix_fet='iclamp2')
 
     gs1 = gridspec.GridSpecFromSubplotSpec(2, 2, wspace=0.2,
@@ -307,7 +307,7 @@ if __name__ == '__main__':
     gs2 = gridspec.GridSpecFromSubplotSpec(3, 3, wspace=0.2,
                                            width_ratios=[1, 1, 1],
                                            subplot_spec=gs[2, :])
-    for ii, rise_tm in enumerate(['_rise_0.1', '_rise_0.6', '_rise_1.2']):
+    for ii, rise_tm in enumerate(['_rise_3.0', '_rise_5.0', '_rise_7.0']):
         for jj, refrac in enumerate([2, 6, 10]):
             filename_prefix = 'refrac_' + str(refrac) + rise_tm
             ax = plt.subplot(gs2[jj, ii])
