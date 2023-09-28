@@ -106,8 +106,8 @@ def process_spikes(spikes, isi_preset, time):
 
 
 def mega_run(filename_prefix='', refrac=6, tau_rise=5):
-    test_spike_quants = np.logspace(-2.5, -0.5, 10)  # np.logspace(-0.15, 1.75, 10)
-    test_bls_vals = np.linspace(10, 40, 10)
+    test_spike_quants = np.logspace(-2.5, -0.6, 10)  # np.logspace(-0.15, 1.75, 10)
+    test_bls_vals = np.linspace(15, 40, 10)
     QQ = len(test_spike_quants)
     BB = len(test_bls_vals)
     isi_dur_tot = np.zeros((QQ, BB))

@@ -110,7 +110,7 @@ def fetch_isi(iclamp):
 
     
 def mega_run_fet(filename_prefix='', ros_baseline=False):
-    test_spike_quants = np.logspace(-2.5, -0.5, 10)  # np.logspace(-0.15, 1.75, 10)
+    test_spike_quants = np.logspace(-2.5, -0.6, 10)  # np.logspace(-0.15, 1.75, 10)
     test_bls_vals = np.linspace(60, 160, 10)
     QQ = len(test_spike_quants)
     BB = len(test_bls_vals)

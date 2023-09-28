@@ -430,13 +430,13 @@ def fet_cases_considered(gs0, firing_tests, theta_fet):
     ax3.text(60000, theta_fet, s=r'$\theta_{FET}$', ha='right',
              color=fp.def_colors['fet'], va='top',
              transform=ax3.transData, fontsize=7, clip_on=False)
-    # ax1.set_ylim(0.07, 0.22)
-    # ax2.set_ylim(0.3, 0.7)
-    # ax3.set_ylim(-0.08, 0.00)
+    ax1.set_ylim(0.07, 0.22)
+    ax2.set_ylim(0.3, 0.7)
+    ax3.set_ylim(-0.08, 0.00)
     # # Ticks
-    # ax1.set_yticks([0.07, 0.22])
-    # ax2.set_yticks([.3, .7])
-    # ax3.set_yticks([-0.08, 0])
+    ax1.set_yticks([0.07, 0.22])
+    ax2.set_yticks([.3, .7])
+    ax3.set_yticks([-0.08, 0])
     ax1.ticklabel_format(axis='y',
                          style='sci', scilimits=(0, 0))
     ax2.ticklabel_format(axis='y',
@@ -639,7 +639,7 @@ def plot_summary(gss, fet_cases, ret_cases):
         if ii > 0:
             xx = np.searchsorted(mito_baseline, case.bl, side='left')
             yy = np.searchsorted(spike_quanta, case.q, side='left')
-            ax1.plot(xx, yy, marker='*', clip_on=False,
+            ax1.plot(xx-0.5, yy-0.5, marker='*', clip_on=False,
                      color=fp.ln_cols_ret[ii], markersize=7,
                      markeredgecolor='k', markeredgewidth=0.3,  zorder=10)
 
@@ -662,7 +662,7 @@ def plot_summary(gss, fet_cases, ret_cases):
         if ii < 2:
             xx = np.searchsorted(mito_baseline, case.bl, side='left')
             yy = np.searchsorted(spike_quanta, case.q, side='left')
-            ax2.plot(xx, yy, marker='*', clip_on=False,
+            ax2.plot(xx-0.5, yy-0.5, marker='*', clip_on=False,
                      color=fp.ln_cols_fet[ii], markersize=7,
                      markeredgecolor='k', markeredgewidth=0.3,  zorder=10)
     cax2 = plt.subplot(gs[3, :])
@@ -690,8 +690,8 @@ def plot_summary(gss, fet_cases, ret_cases):
     cbar.outline.set_visible(False)
     fix_axis_ticks([ax2], mito_baseline, spike_quanta)
     # ax2.set_yticklabels([])
-    ax1.set_ylabel('Per-spike cost (%s)' % kANT_units)
-    ax2.set_ylabel('Per-spike cost (%s)' % kANT_units)
+    ax1.set_ylabel('Per-spike cost (a.u.)')
+    ax2.set_ylabel('Per-spike cost (a.u.)')
     ax1.set_xlabel('Non-spiking costs (%s)' % kANT_units,
                    fontsize=7, color='k')
     ax2.set_xlabel('Non-spiking costs (%s)' % kANT_units,
@@ -709,12 +709,15 @@ def fix_axis_ticks(axs, mito_baseline, spike_quanta):
                   if ii % 4 == 0]
         ax.set_xticklabels(labels)
     axs[0].set_yticks(np.arange(len(spike_quanta))[::2])
-    labels = ["{0:.1f}".format(x) for x in spike_quanta]
+    labels = ["{:.1f}".format(x*100) for x in spike_quanta]
     axs[0].set_yticklabels(labels[::2])
     for ax in axs[1:]:
         ax.set_yticks(np.arange(len(spike_quanta))[::2])
         labels = ["" for x in spike_quanta]
         ax.set_yticklabels(labels[::2])
+    fontprops = fm.FontProperties(size=6)
+    axs[0].text(0., 1.05, s="1e-2", ha='left', va='center',
+                transform=axs[0].transAxes, fontproperties=fontprops)
 
     
 def single_run(case):

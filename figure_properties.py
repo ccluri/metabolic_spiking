@@ -11,7 +11,7 @@ from palettable.cartocolors.sequential import Burg_5
 from palettable.colorbrewer.qualitative import Set2_8, Set1_8, Set3_12
 from palettable.colorbrewer.sequential import RdPu_5, BuPu_5, YlGn_5
 
-plt.rcParams.update({
+style_dict = {
     'font.family': 'sans-serif',
     'font.sans-serif': 'Arial',
     'xtick.labelsize': 6,
@@ -33,7 +33,8 @@ plt.rcParams.update({
     'axes.titlepad': 2,
     'legend.fontsize': 7,
     'axes.linewidth': 0.5
-})
+}
+plt.rcParams.update(style_dict)
 
 
 def add_arrow(line, position=None, direction='right', size=15,
