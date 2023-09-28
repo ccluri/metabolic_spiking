@@ -1,5 +1,10 @@
 # Metabolic spiking
 
+## Tutorial
+
+Launch tutorial by clicking : [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ccluri/metabolic_spiking/renorm)
+
+
 ## Installation and requirements
 This software was tested on Ubuntu machine (20.04) with Anaconda python package manager. To install the exact python environment, with compatible libraries please use the py36.yml file as follows (you have to edit the last line of this file depending on where anaconda is installed on your machine)
 

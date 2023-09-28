@@ -134,6 +134,7 @@ dependencies:
   - matplotlib-base=3.8.0=py310h62c0568_1
   - matplotlib-inline=0.1.6=pyhd8ed1ab_0
   - mistune=3.0.1=pyhd8ed1ab_0
+  - mscorefonts=0.0.1=3
   - munkres=1.1.4=pyh9f0ad1d_0
   - mysql=5.7.24=h721c034_2
   - nbclient=0.8.0=pyhd8ed1ab_0
