@@ -2,8 +2,16 @@
 
 ## Tutorial
 
-Launch tutorial by clicking : [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ccluri/metabolic_spiking/renorm)
+
 Please see the folder tutorial for getting started.
+Google collaboratory based
+Tutorial1: https://colab.research.google.com/drive/1z3FlVweGB9Q4xz9FIDcE4ftLDeQAANQa?usp=sharing
+Tutorial2: https://colab.research.google.com/drive/17lnH_0DHNORWwQ4vwI2Rqt76sqKVrXJ7?usp=sharing
+
+
+Binder based (currently facing slow loading times, please use above links for now.)
+Launch tutorial1 by clicking : [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ccluri/metabolic_spiking/renorm)
+
 
 
 ## Installation and requirements
