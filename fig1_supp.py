@@ -172,7 +172,7 @@ def f_mcu_pert_sc(ax, f_mcus):
         if f_mcu == 0:
             label = r'$f_{MCU}=0$'
         else:
-            label = r'$f_{MCU}=$'+str(round(f_mcu*1000, 2))+'M/V'
+            label = r'$f_{MCU}=$'+str(round(f_mcu*1000))+'mM/Vs'
         ax.semilogx(b_test, vals, lw=1.5, c=col,
                     label=label)
     ax = add_ros_ss(ax)

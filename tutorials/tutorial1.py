@@ -129,7 +129,7 @@ def ros_ss_steady(bl):
     ax2.set_xticklabels(['ATP', 'PSI', 'NAD+', 'Pyr', 'ROS'])
     ax2.spines['right'].set_visible(False)
     ax2.spines['top'].set_visible(False)
-
+    return
 #######################################################
 
 

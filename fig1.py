@@ -40,7 +40,7 @@ def single_spike(ax0):
 
 def quantum(ax1, bls, atps, tt):
     '''Illustrating baseline plus Q atp->adp'''
-    for ii, bl in enumerate(bls):
+    for ii, bl in enumerate(bls[:1]):
         lns = ax1.plot(tt, atps[ii],
                        color='k', lw=0.5)
         if ii == 0:
@@ -57,21 +57,25 @@ def quantum(ax1, bls, atps, tt):
     # ax1.add_collection(lc)
     
     ax1.set_xlabel('Time (ms)')
-    ax1.set_ylim(-0.1, 1.1)
+    ax1.set_ylim(0.65, 1.01)
     ax1.set_ylabel(r'$ATP_C$ (a.u.)')
-    ax1.set_yticks([0, 1])
+    ax1.set_yticks([0.7, 1])
 
     # labels = [item.get_text() for item in ax1.get_yticklabels()]
     # empty_string_labels = [' ']*len(labels)
     # ax1.set_yticklabels(empty_string_labels)
 
     ax1.plot(-25, atps[0][0], marker='*', c='k', clip_on=False,
-             markersize=7.5, markeredgewidth=0.5, markeredgecolor='none',
+             markersize=7.5, markeredgewidth=0.25, markeredgecolor='w',
              zorder=10)
-    ax1.plot(-25, atps[1][0], marker='*', c='gold', clip_on=False,
-             markersize=7.5, markeredgewidth=0.5, markeredgecolor='k',
-             zorder=10)
-    # ax1.text(s='+Q', x=85, y=27.5, fontsize=7)
+    # ax1.plot(-25, atps[1][0], marker='*', c='gold', clip_on=False,
+    #          markersize=7.5, markeredgewidth=0.5, markeredgecolor='k',
+    #          zorder=10)
+    
+    ax1.text(s='Q=0.2', x=0, y=(min(atps[0])+max(atps[0]))/2, fontsize=7)
+    ax1.annotate('', xy=(130, min(atps[0])), xycoords='data',
+                 xytext=(130, max(atps[0])), textcoords='data',
+                 arrowprops={'arrowstyle': '|-|', 'mutation_scale': 2})
     ax1.set_xlim(-25, 500)
 
 
@@ -95,7 +99,7 @@ def excursion(ax2):
     lns = []
     for cc, baseline_atp in zip(star_colors, baselines):
         m_state1, tx, r_vals = spike_quanta(baseline_atp=baseline_atp,
-                                            q=0.1, tot_time=750)
+                                            q=0.2, tot_time=750)
         lns.append(ax2.plot(m_state1.out['atp'], m_state1.out['psi'],
                             lw=0.5, c='k', alpha=1))
         # points = np.array([m_state1.out['atp'],

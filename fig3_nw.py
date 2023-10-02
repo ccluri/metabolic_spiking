@@ -23,7 +23,7 @@ def summary_spikes(total_neurons, sim_time, times, nidx, M, dict_key,
     seed, we, wi, Amax, Atau, K_mu, K_sig = dict_key.split('_')
     start_time = 0.475*sim_time/ms
     end_time = (0.1+0.475)*sim_time/ms
-    figsize = fp.cm_to_inches([8.9, 19])
+    figsize = fp.cm_to_inches([8.9, 17.5])
     fig = plt.figure(figsize=figsize)  # width x height
     fig.set_constrained_layout_pads(w_pad=0, h_pad=0)
     gs = gridspec.GridSpec(7, 4, wspace=0.4, hspace=0.,
@@ -46,7 +46,7 @@ def summary_spikes(total_neurons, sim_time, times, nidx, M, dict_key,
     test_ks = np.geomspace(0.1, 10, num=100)
     ax1.plot(test_ks, Minf((2/(1+test_ks))),
              c='#d95f02', lw=0.5)
-    ax1.set_ylabel('I$_{metabolic}$', labelpad=-7)
+    ax1.set_ylabel('I$_{metabolic}$', labelpad=-2)
     ax1.text(-0.2, 1.1, s='(nA)', color='k', va='center', ha='center',
              transform=ax1.transAxes, clip_on=False)
     # set_ylabel('%', loc='top', rotation=0, labelpad=-5)
@@ -494,7 +494,7 @@ if __name__ == '__main__':
         dict_fh, dict_sh, M_fh, M_sh = avaln.props_split(times, nidx,
                                                          M, sim_time)
         plot_filename = filename.rstrip('_spks.pkl') + '.png'
-        plot_filename = 'Figure3_nw.png'
+        plot_filename = 'Figure3_nwx.png'
         summary_spikes(total_neurons, sim_time, times,
                        nidx, M, dict_key, dict_entry, filename=plot_filename,
                        opt_dicts=[dict_fh, dict_sh,

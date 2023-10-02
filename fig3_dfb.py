@@ -77,11 +77,11 @@ def ros_ss(ax, ross, cases, atp_bl):
 
     xy_leftbox = [1, 0]
     p = Rectangle(xy_leftbox, bls[48]-0.1, 1, clip_on=False,
-                  edgecolor='none', facecolor='#dcdcdc', alpha=0.5)
+                  edgecolor='none', facecolor='#dcdcdc', alpha=1)
     ax.add_patch(p)
     xy_leftbox = [bls[72], 0]
     p = Rectangle(xy_leftbox, bls[-1], 1, clip_on=False,
-                  edgecolor='none', facecolor='#dcdcdc', alpha=0.5)
+                  edgecolor='none', facecolor='#dcdcdc', alpha=1)
     ax.add_patch(p)
     
     ax.plot(bls[:49], these_ros[0][:49], lw=0.5, c='k', ls='-.')

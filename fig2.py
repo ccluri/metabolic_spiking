@@ -188,7 +188,7 @@ def make_raster_plot(ax, ii, spk, spikes_offset, l_col):
     if np.min(np.diff(spk)) < 3:
         lw = 0.5
     else:
-        lw = 1
+        lw = 0.7
     for sp in spk:
         ax.plot([sp-spikes_offset, sp-spikes_offset],
                 [ii, ii+length], lw=lw, c=l_col)
@@ -251,26 +251,26 @@ def ret_cases_considered(gs0, firing_tests, theta_ret=0.025):
             make_raster_plot(ax0, ii*3, spk, spikes_offset, l_col)
     #  Set limits
     if case.start is not False:
-        ax0.set_xlim(case.start-25, 1100)
-
+        ax0.set_xlim(case.start-25, 900)
+        # ax0.set_xlim(0, end_idx-start_idx)
         ax1.set_xlim(0, end_idx-start_idx)
         ax2.set_xlim(0, end_idx-start_idx)
         ax3.set_xlim(0, end_idx-start_idx)
 
-        ax1.set_ylim(0.05, 0.18)
-        ax2.set_ylim(0.73, 0.87)
-        ax3.set_ylim(0.003, 0.027)
+        ax1.set_ylim(0.07, 0.2)
+        ax2.set_ylim(0.8, 0.9)
+        ax3.set_ylim(0.005, 0.027)
         ax3.plot([0, 30000], [theta_ret, theta_ret], lw=0.5, ls='--',
                  color=fp.def_colors['ret'], zorder=-11)
-        ax3.text(8500, 0.025, s=r'$\theta_{RET}$', ha='right',
+        ax3.text(10000, 0.025, s=r'$\theta_{RET}$', ha='right',
                  color=fp.def_colors['ret'], va='bottom',
                  transform=ax3.transData, fontsize=7, clip_on=False)
         # # Ticks
         ax0.set_yticks([])
         ax0.spines['left'].set_visible(False)
         ax1.set_yticks([0.05, 0.18])
-        ax2.set_yticks([0.73, 0.9])
-        ax3.set_yticks([0.003, 0.033])
+        ax2.set_yticks([0.8, 0.9])
+        ax3.set_yticks([0.005, 0.033])
         ax1.ticklabel_format(axis='y',
                              style='sci', scilimits=(0, 0))
         ax2.ticklabel_format(axis='y',
@@ -313,7 +313,8 @@ def ret_cases_considered(gs0, firing_tests, theta_ret=0.025):
                                        color='gray',
                                        coordsA="data", coordsB="axes fraction")
         ax0.add_patch(ccp2)
-        # Add sizebars
+        
+    # Add sizebars
     ymin, ymax = ax0.get_ybound()
 
     asb0 = AnchoredSizeBar(ax0.transData,
@@ -427,16 +428,16 @@ def fet_cases_considered(gs0, firing_tests, theta_fet):
     ax3.set_xlim(0, end_idx-start_idx)
     ax3.plot([0, 79999], [theta_fet, theta_fet], lw=0.5, ls='--',
              color=fp.def_colors['fet'], zorder=-11)
-    ax3.text(60000, theta_fet, s=r'$\theta_{FET}$', ha='right',
+    ax3.text(55000, theta_fet, s=r'$\theta_{FET}$', ha='right',
              color=fp.def_colors['fet'], va='top',
              transform=ax3.transData, fontsize=7, clip_on=False)
-    ax1.set_ylim(0.07, 0.22)
-    ax2.set_ylim(0.3, 0.7)
-    ax3.set_ylim(-0.08, 0.00)
+    ax1.set_ylim(0.07, 0.2)
+    ax2.set_ylim(0.1, 0.7)
+    ax3.set_ylim(-0.07, 0.01)
     # # Ticks
-    ax1.set_yticks([0.07, 0.22])
-    ax2.set_yticks([.3, .7])
-    ax3.set_yticks([-0.08, 0])
+    ax1.set_yticks([0.07, 0.2])
+    ax2.set_yticks([.1, .7])
+    ax3.set_yticks([-0.07, .01])
     ax1.ticklabel_format(axis='y',
                          style='sci', scilimits=(0, 0))
     ax2.ticklabel_format(axis='y',
@@ -759,9 +760,9 @@ class TestBLCases(object):
         else:
             if test_type == 'fet':
                 self.start = align_spike_at - 100
-                self.end = self.start + 800
+                self.end = self.start + 700
             else:
-                self.start = align_spike_at - 25
+                self.start = align_spike_at - 50
                 self.end = self.start + 300
         self.title_text = title_text
         self.test_type = test_type
@@ -769,7 +770,7 @@ class TestBLCases(object):
         
 if __name__ == '__main__':
     kANT_units = '10$^{-3}$/s'
-    figsize = fp.cm_to_inches([10, 17])
+    figsize = fp.cm_to_inches([8.9, 17])
     fig = plt.figure(figsize=figsize)
     fig.set_constrained_layout_pads(w_pad=0, h_pad=0)
     gs = gridspec.GridSpec(4, 2, hspace=1,
@@ -785,29 +786,30 @@ if __name__ == '__main__':
                                            height_ratios=[1.25, 1, 1, 1],
                                            subplot_spec=gs[1, 0])
 
-    at_min = TestBLCases(bl=30, q=0.08, test_type='ret',
-                         align_spike_at=622.82,
-                         title_text='30,0.08')
-    at_min_bl = TestBLCases(bl=30, q=0.03, test_type='ret',
-                            align_spike_at=540.33,
-                            title_text='30,0.03')
-    at_min_bl_fast = TestBLCases(bl=30, q=0.03, test_type='ret',
+    at_min = TestBLCases(bl=30, q=0.06, test_type='ret',
+                         align_spike_at=427.31,
+                         title_text='30,0.06')
+    at_min_bl = TestBLCases(bl=30, q=0.012, test_type='ret',
+                            align_spike_at=542.46,
+                            title_text='30,0.012')
+    at_min_bl_fast = TestBLCases(bl=30, q=0.012, test_type='ret',
                                  refrac=2,
-                                 align_spike_at=671.3,
-                                 title_text='30,0.03')
+                                 align_spike_at=587.17,
+                                 title_text='30,0.012')
     ret_cases = [at_min_bl_fast, at_min_bl, at_min]
     ret_cases_considered(gs1, ret_cases)
+    
 
     # # # # fet cases
     gs2 = gridspec.GridSpecFromSubplotSpec(4, 1,
                                            height_ratios=[1.25, 1, 1, 1],
                                            subplot_spec=gs[1, 1])
-    at_min = TestBLCases(bl=70, q=0.08, test_type='fet',
+    at_min = TestBLCases(bl=80, q=0.06, test_type='fet',
                          align_spike_at=700.0,
-                         title_text='80,13')
-    at_max_q = TestBLCases(bl=70, q=0.15, test_type='fet',
+                         title_text='80,0.06')
+    at_max_q = TestBLCases(bl=80, q=0.15, test_type='fet',
                            align_spike_at=700.0,
-                           title_text='80,30')
+                           title_text='80,0.15')
     fet_cases = [at_max_q, at_min]
     fet_cases_considered(gs2, fet_cases, theta_fet=-0.05)
 

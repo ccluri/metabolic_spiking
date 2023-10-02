@@ -70,19 +70,20 @@ def quantum(ax1):
     '''Illustrating baseline plus Q atp->adp'''
     dt = 0.01
     tt = np.arange(0, 500, dt)
-    Qval = np.zeros_like(tt)
-    vals = Q_nak(tt, 30)
-    Qval[int(150/dt):] += vals[:len(Qval[int(150/dt):])]
-    Qval[int(175/dt):] += vals[:len(Qval[int(175/dt):])]
+    Qval = np.zeros_like(tt) + 0.75
+    vals = Q_nak(tt, 0.1)
+    Qval[int(150/dt):] -= vals[:len(Qval[int(150/dt):])]
+    Qval[int(175/dt):] -= vals[:len(Qval[int(175/dt):])]
     ax1.plot(tt, Qval, c='k', lw=0.5)
     ax1.set_xlabel('Time (ms)')
-    ax1.set_ylim(-20, 70)
-    ax1.set_ylabel(r'$ATP_C \rightarrow ADP_C$'+'\n(%s)' % Kant_units)
+    ax1.set_ylim(0.4, 0.8)
+    ax1.set_ylabel(r'$ATP_C$'+'(a.u.)')
     ax1.set_yticks([])
     ax1.set_yticklabels([])
-    ax1.plot(100, 0, marker='*', c='k', clip_on=False, markersize=7,
-             markeredgecolor='none')
-    ax1.text(s='+Q', x=120, y=27.5, fontsize=7)
+    ax1.plot(100, 0.75, marker='*', c='k', clip_on=False, markersize=7,
+             markeredgecolor='w', markeredgewidth=0.1)
+    ax1.text(s='-Q', x=130, y=.65, fontsize=7)
+    ax1.text(s='-Q', x=155, y=.55, fontsize=7)
     ymin, ymax = ax1.get_ybound()
     asb0 = AnchoredSizeBar(ax1.transData,
                            int(25),
@@ -104,24 +105,26 @@ def spike_rise(ax, xlim, ylim):
     dt = 0.01
     tt = np.arange(0, 500, dt)
     t_peak = []
-    for cc, rise_tm in zip(fp.ln_cols_rise, [0.1, 0.6, 1.2]):
-        Qval = np.zeros_like(tt)
-        vals = Q_nak(tt, 30, tau_rise=rise_tm)
-        Qval[int(150/dt):] += vals[:len(Qval[int(150/dt):])]
-        t_peak_val = tt[np.argmax(Qval)]-150
+    for cc, rise_tm in zip(fp.ln_cols_rise, [3, 5, 7]):
+        Qval = np.zeros_like(tt) + 0.75
+        vals = Q_nak(tt, 0.1, tau_rise=rise_tm)
+        Qval[int(150/dt):] -= vals[:len(Qval[int(150/dt):])]
+        t_peak_val = tt[np.argmin(Qval)]-150
         t_peak.append(t_peak_val)
         ax.plot(tt, Qval, c=cc, label=str(int(t_peak_val)) + ' ms', lw=0.5)
+        # ax.plot(tt, Qval, c=cc, label=str(int(rise_tm)) + ' ms', lw=0.5)
     print(t_peak)
-    ax.plot(150, -5, marker='o', c='g', clip_on=False, markersize=5)
+    ax.plot(150, 0.75, marker='o', c='g', clip_on=False, markersize=5)
     ax.plot([150, 150], [-5, 70], ls=':', c='g', lw=0.5)
     ax.annotate('$t_{lag}$', va='center',
-                xy=(149.6, 35), xycoords='data', color=fp.ln_cols_rise[0],
-                xytext=(149.6+t_peak[0]+1, 35), textcoords='data',
+                xy=(149.6, 0.62), xycoords='data', color=fp.ln_cols_rise[0],
+                xytext=(149.6+t_peak[0]+1, 0.62), textcoords='data',
                 arrowprops=dict(arrowstyle="|-|", mutation_scale=3, lw=1,
                                 color=fp.ln_cols_rise[0]))
-    ax.legend(frameon=False, loc='lower left', handlelength=0.5, ncol=1,
-              title='$t_{lag}$', bbox_to_anchor=(0.6, -0.05),
-              bbox_transform=ax.transAxes)
+    ll = ax.legend(frameon=False, loc='upper right', handlelength=0.5, ncol=1)
+                   # title='$t_{lag}$') # , bbox_to_anchor=(0.6, -0.05),
+              # bbox_transform=ax.transAxes)
+    ax.text(163, 0.78, s=r'$t_{lag}$')
     ax.set_xlim(xlim)
     ax.set_ylim(ylim)
     ax.get_xaxis().set_visible(False)
@@ -283,9 +286,9 @@ if __name__ == '__main__':
     ax_atp_costs = plt.subplot(gs1[1, 0])
     quantum(ax_atp_costs)
     align_axis_labels([ax_atp_costs], axis='y', value=-0.1)
-    xy_inset = (145, -5)
-    wd_inset = 20
-    ht_inset = 45
+    xy_inset = (145, 0.6)
+    wd_inset = 40
+    ht_inset = 0.2
     ax_spike_rises = plt.subplot(gs1[:, 1])
     spike_rise(ax_spike_rises,
                xlim=[xy_inset[0], xy_inset[0]+wd_inset],
@@ -307,7 +310,7 @@ if __name__ == '__main__':
                                    lw=0.3, color='gray',
                                    coordsA="data", coordsB="axes fraction")
     ax_atp_costs.add_patch(ccp2)
-    title_texts = ['4 ms', '8 ms', '12 ms']
+    title_texts = ['23 ms', '33 ms', '42 ms']
     axs = []
     gs2 = gridspec.GridSpecFromSubplotSpec(3, 3, wspace=0.2,
                                            width_ratios=[1, 1, 1],
