@@ -76,6 +76,7 @@ def ros_ss(min_atp=10, max_atp=200, bl=30, theta_ret=0.025, theta_fet=-0.05):
     ax.set_xlabel(r'Non-spiking costs (%s)' % kANT_units)
     ax.set_ylabel(r'Metabolic Signal (a.u.)')
     plt.legend(frameon=False, loc='upper right')
+    plt.show()
     return
 
 style = {'description_width': 'initial'}
@@ -250,7 +251,7 @@ def spike_shape(bl=45, q=0.1, tau_rise=5):
     ax.spines['right'].set_visible(False)
     ax.spines['top'].set_visible(False)
     ax.set_yticks([0, 0.25, 0.5, 0.75, 1])
-    
+    plt.show()
     
 #######################################################
 refrac_sel = widgets.IntSlider(value=5, min=1, max=15, step=1,
