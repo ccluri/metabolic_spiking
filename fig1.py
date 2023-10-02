@@ -1,10 +1,10 @@
 import numpy as np
 
-from utils import Recorder, Q_nak
-from mitochondria import Mito
+from utils import Recorder
+from mitosfns import spike_quanta, run_sim
 from steady_state import get_steady_state
 from lifcell import LIFCell
-from gates import ros_inf, get_ros
+from gates import ros_inf
 
 import figure_properties as fp
 import matplotlib.pyplot as plt
@@ -32,65 +32,50 @@ def single_spike(ax0):
         c.update_vals(dt)
         r.update(i)
     ax0.plot(t, r.out['v'], c='k', lw=0.5)
-    ax0.set_ylabel('Memb. Pot.')
+    ax0.set_ylabel('Memb. Pot.(mV)')
     ax0.text(0, 0, '(mV)', va='center', ha='left')
     ax0.set_xlim(-25, 500)
     return ax0
 
 
-def spike_quanta(baseline_atp, q):
-    '''Perturbation due to a spike'''
-    dt = 0.01
-    time = 500
-    factor = 0.1e-4
-    tt = np.arange(0, time, dt)
-    m = Mito(baseline_atp=baseline_atp)
-    m.steadystate_vals(time=2000)  # state 4 - wait till we reach here
-    Q_val = Q_nak(tt, q)
-    spike_val = np.zeros_like(tt)
-    t_start = 150
-    spike_val[int(t_start/dt):] += Q_val[:len(spike_val[int(t_start/dt):])]
-    rec_vars_list = ['atp', 'psi', 'k_ant']
-    m_record = Recorder(m, rec_vars_list, time, dt)
-    for ii, tt in enumerate(np.arange(0, time, dt)):
-        try:
-            m.update_vals(dt, atp_cost=spike_val[ii],
-                          leak_cost=spike_val[ii]*factor)
-        except IndexError:
-            m.update_vals(dt, leak_cost=0, atp_cost=0)
-        m_record.update(ii)
-    return m_record
-
-
-def quantum(ax1):
+def quantum(ax1, bls, atps, tt):
     '''Illustrating baseline plus Q atp->adp'''
-    dt = 0.01
-    tt = np.arange(0, 500, dt)
-    Qval = np.zeros_like(tt)
-    vals = Q_nak(tt, 30)
-    Qval[int(150/dt):] += vals[:len(Qval[int(150/dt):])]
-    lns = ax1.plot(tt, Qval, color='w', alpha=0) # fake line
-    points = np.array([tt, Qval]).T.reshape(-1, 1, 2)
-    segments = np.concatenate([points[:-1], points[1:]], axis=1)
-    norm = plt.Normalize(0, 500)
-    lc = LineCollection(segments, cmap='viridis_r', norm=norm)
-    # Set the values used for colormapping
-    lc.set_array(tt)
-    lc.set_linewidth(1)
-    ax1.add_collection(lc)
+    for ii, bl in enumerate(bls[:1]):
+        lns = ax1.plot(tt, atps[ii],
+                       color='k', lw=0.5)
+        if ii == 0:
+            fp.add_arrow(lns[0], position=(175, 1), color='c', size=5)
+            fp.add_arrow(lns[0], position=(215, 1), color='b', size=5)
+
+    # points = np.array([tt, Qval]).T.reshape(-1, 1, 2)
+    # segments = np.concatenate([points[:-1], points[1:]], axis=1)
+    # norm = plt.Normalize(0, 500)
+    # lc = LineCollection(segments, cmap='viridis_r', norm=norm)
+    # # Set the values used for colormapping
+    # lc.set_array(tt)
+    # lc.set_linewidth(1)
+    # ax1.add_collection(lc)
+    
     ax1.set_xlabel('Time (ms)')
-    ax1.set_ylim(-10, 40)
-    ax1.set_ylabel(r'$ATP_C \rightarrow ADP_C$' +
-                   '\n(%s)' % kANT_units)
-    ax1.set_yticks([])
-    labels = [item.get_text() for item in ax1.get_yticklabels()]
-    empty_string_labels = [' ']*len(labels)
-    ax1.set_yticklabels(empty_string_labels)
-    ax1.plot(-25, 0, marker='*', c='k', clip_on=False, markersize=7.5,
-             markeredgewidth=0.5, markeredgecolor='white', zorder=10)
-    ax1.text(s='+Q', x=85, y=27.5, fontsize=7)
-    fp.add_arrow(lns[0], position=155, color='k', size=6.5)
-    fp.add_arrow(lns[0], position=300, color='k', size=6.5)
+    ax1.set_ylim(0.65, 1.01)
+    ax1.set_ylabel(r'$ATP_C$ (a.u.)')
+    ax1.set_yticks([0.7, 1])
+
+    # labels = [item.get_text() for item in ax1.get_yticklabels()]
+    # empty_string_labels = [' ']*len(labels)
+    # ax1.set_yticklabels(empty_string_labels)
+
+    ax1.plot(-25, atps[0][0], marker='*', c='k', clip_on=False,
+             markersize=7.5, markeredgewidth=0.25, markeredgecolor='w',
+             zorder=10)
+    # ax1.plot(-25, atps[1][0], marker='*', c='gold', clip_on=False,
+    #          markersize=7.5, markeredgewidth=0.5, markeredgecolor='k',
+    #          zorder=10)
+    
+    ax1.text(s='Q=0.2', x=0, y=(min(atps[0])+max(atps[0]))/2, fontsize=7)
+    ax1.annotate('', xy=(130, min(atps[0])), xycoords='data',
+                 xytext=(130, max(atps[0])), textcoords='data',
+                 arrowprops={'arrowstyle': '|-|', 'mutation_scale': 2})
     ax1.set_xlim(-25, 500)
 
 
@@ -107,23 +92,26 @@ def excursion(ax2):
     ros_land_dummy(ax2)
     # plot_bl_curve(ax2)
     baselines = [30, 150]
+    atp_bls = []
     star_colors = ['black', 'gold']
-    dt = 0.01
-    tt = np.arange(0, 500, dt)
+    # dt = 0.01
+    # tt = np.arange(0, 750, dt)
     lns = []
     for cc, baseline_atp in zip(star_colors, baselines):
-        m_state1 = spike_quanta(baseline_atp=baseline_atp, q=50)
+        m_state1, tx, r_vals = spike_quanta(baseline_atp=baseline_atp,
+                                            q=0.2, tot_time=750)
         lns.append(ax2.plot(m_state1.out['atp'], m_state1.out['psi'],
-                            lw=1, c='white', alpha=0.2))
-        points = np.array([m_state1.out['atp'],
-                           m_state1.out['psi']]).T.reshape(-1, 1, 2)
-        segments = np.concatenate([points[:-1], points[1:]], axis=1)
-        norm = plt.Normalize(0, 500)
-        lc = LineCollection(segments, cmap='viridis_r', norm=norm)
-        # Set the values used for colormapping
-        lc.set_array(tt)
-        lc.set_linewidth(1)
-        ax2.add_collection(lc)
+                            lw=0.5, c='k', alpha=1))
+        # points = np.array([m_state1.out['atp'],
+        #                    m_state1.out['psi']]).T.reshape(-1, 1, 2)
+        # segments = np.concatenate([points[:-1], points[1:]], axis=1)
+        # norm = plt.Normalize(0, 500)
+        # lc = LineCollection(segments, cmap='viridis_r', norm=norm)
+        # # Set the values used for colormapping
+        # lc.set_array(tt)
+        # lc.set_linewidth(1)
+        # ax2.add_collection(lc)
+        atp_bls.append(m_state1.out['atp'])
         if cc == 'gold':
             ax2.plot(m_state1.out['atp'][0], m_state1.out['psi'][0],
                      marker='*', c=cc, clip_on=False, markersize=7,
@@ -132,8 +120,8 @@ def excursion(ax2):
             ax2.plot(m_state1.out['atp'][0], m_state1.out['psi'][0],
                      marker='*', c=cc, clip_on=False, markersize=7.5,
                      markeredgecolor='none')
-    fp.add_arrow(lns[0][0], position=0.85, color='k', size=6.5)
-    fp.add_arrow(lns[0][0], position=0.74, color='k', size=6.5)
+    fp.add_arrow(lns[0][0], position=(0.6, 0.65), color='c', size=6.5)
+    fp.add_arrow(lns[0][0], position=(0.9, 0.5), color='b', size=6.5)
     ax2.set_aspect('equal')
     ax2.set_xlim(0, 1.)
     ax2.set_ylim(0, 1.)
@@ -143,7 +131,7 @@ def excursion(ax2):
     ax2.set_yticklabels([0, '', 1])
     ax2.set_xlabel('$ATP_M$')
     ax2.set_ylabel(r'$\Delta\psi$', rotation=0)
-    return ax2
+    return ax2, baselines, atp_bls, tx
 
 
 def ros_ss(ax):
@@ -154,7 +142,7 @@ def ros_ss(ax):
         ros_vals[ii] = ros_inf(atp(bl), psi(bl))
     ax.semilogx(bls, ros_vals, label=r'$ROS_{SS}$', lw=1, c='k')
     ax.plot(30, 0, marker='*', clip_on=False, color='k', markersize=7.5,
-            markeredgecolor='none')
+            markeredgecolor='None')
     ax.plot(150, 0, marker='*', clip_on=False, color='gold', markersize=7,
             markeredgecolor='k', markeredgewidth=0.5, zorder=10)
     ax.set_ylim(0., 1.)
@@ -224,8 +212,8 @@ def metabolic_spikes(ax):
     ln_cols = [fp.def_colors['ln1'],
                fp.def_colors['ln2'],
                fp.def_colors['ln3']]
-    for jj, freq in enumerate([5, 10, 20]):
-        b_test, vals = run_sim(freq, spike_quanta=30)
+    for jj, freq in enumerate([2, 5, 10]):
+        b_test, vals = run_sim(freq, spike_quanta=0.1)
         ax.semilogx(b_test, vals, label=str(int(freq))+' Hz', marker='o',
                     c=ln_cols[jj],
                     lw=0.5, markersize=2)
@@ -240,54 +228,6 @@ def metabolic_spikes(ax):
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     return ax
-
-
-def run_sim(test_freq, spike_quanta, psi_fac=0.1e-4, ros=get_ros(), tau_Q=100):
-    fname_list = [test_freq, spike_quanta, psi_fac, ros.name, tau_Q]
-    filename = '_'.join([str(yy) for yy in fname_list])
-    filename += '.npz'
-    try:
-        kk = np.load('./spike_compensation/'+filename)
-        bls, ros_metb_spikes = kk['bls'], kk['ros_metb_spikes']
-    except FileNotFoundError:
-        print('No prev compute found, running sim now')
-        bls = np.geomspace(1, 1000, 20)
-        ros_metb_spikes = np.zeros_like(bls)
-        for ij, mito_baseline in enumerate(bls):
-            print('Baseline : ', mito_baseline, 'Quanta :', spike_quanta)
-            print('Psi factor: ', psi_fac)
-            dt = 0.01
-            time = 5000
-            t = np.arange(0, time, dt)
-            qdur = 1000
-            qtime = np.arange(0, qdur, dt)
-            this_q = Q_nak(qtime, fact=spike_quanta, tau_Q=tau_Q)
-            qlen = len(this_q)
-            mi = Mito(baseline_atp=mito_baseline)
-            mi.steadystate_vals(time=1000)
-            ros.init_val(mi.atp, mi.psi)
-            spike_expns = np.zeros_like(t)
-            test_isi = 1000 / test_freq
-            test_isi_indx = int(test_isi / dt)
-            num_spikes = int(time / test_isi)
-            for sp in range(1, num_spikes+1):
-                sp_idx = test_isi_indx*sp
-                try:
-                    spike_expns[sp_idx:sp_idx+qlen] += this_q
-                except ValueError:
-                    spike_expns[sp_idx:] += this_q[:len(spike_expns[sp_idx:])]
-            ros_vals = np.zeros_like(t)
-            for i in range(len(t)):
-                mi.update_vals(dt,
-                               atp_cost=spike_expns[i],
-                               leak_cost=spike_expns[i]*psi_fac)
-                ros.update_vals(dt, mi.atp, mi.psi,
-                                spike_expns[i]+mito_baseline)
-                ros_vals[i] = ros.get_val()
-            ros_metb_spikes[ij] = np.mean(ros_vals)
-        np.savez('./spike_compensation/'+filename,
-                 bls=bls, ros_metb_spikes=ros_metb_spikes)
-    return bls, ros_metb_spikes
 
 
 def figure_steady_state_simpler(ax1):
@@ -342,14 +282,14 @@ ax_rosss = fp.add_logticks(ax_rosss)
 ax_rosss.tick_params(axis='x', which='major', pad=3)
 
 ax_excursion = fig.add_subplot(gs[1, 0])
-excursion(ax_excursion)
+ax_excursion, test_bls, test_atp, tt_exc = excursion(ax_excursion)
 
 gs22 = gridspec.GridSpecFromSubplotSpec(2, 1, subplot_spec=gs[1, 1],
                                         hspace=0.1)
 ax_spikecost = fig.add_subplot(gs22[1, 0])
 ax_fakespike = fig.add_subplot(gs22[0, 0], sharex=ax_spikecost)
 single_spike(ax_fakespike)
-quantum(ax_spikecost)
+quantum(ax_spikecost, test_bls, test_atp, tt_exc)
 
 ax_steadys = fig.add_subplot(gs[2, 0])
 ax_steadys = figure_steady_state_simpler(ax_steadys)
@@ -382,7 +322,7 @@ fp.align_axis_labels([ax_steadys, ax_excursion,
 fp.align_axis_labels([ax_rosss, ax_fakespike,
                       ax_compensate],
                      axis='y', value=-0.15)
-fp.align_axis_labels([ax_spikecost], axis='y', value=-0.02)
+fp.align_axis_labels([ax_spikecost], axis='y', value=-0.15)
 
 # fp.align_axis_labels([ax_rosland, ax_excursion,
 #                      ax_compensate],

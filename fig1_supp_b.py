@@ -1,8 +1,8 @@
 import numpy as np
 
-from utils import Recorder, Q_nak
-from mitochondria import Mito
-from lifcell import LIFCell
+# from utils import Recorder, Q_nak
+# from mitochondria import Mito
+from mitosfns import spike_quanta, run_sim
 from steady_state import get_steady_state
 
 from gates import get_ros, get_ros_fast, get_ros_slow, ros_inf
@@ -14,108 +14,6 @@ import figure_properties as fp
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
-
-
-def single_spike(ax0):
-    '''Dummy spike'''
-    params = {'deltaga': 0, 'refrc': 10,
-              'Q': 1, 'init_atp': 1, 'g_nap': 1.25}
-    c = LIFCell('test', **params)
-    dt = 0.01
-    time = 500
-    t = np.arange(0, time, dt)
-    i_inj = np.zeros_like(t)
-    t_start = 150
-    t_end = 155
-    i_inj[int(t_start/dt):int(t_end/dt)] = 150
-    r = Recorder(c, ['v'], time, dt)
-    for i in range(len(t)):
-        c.i_inj = i_inj[i]
-        c.update_vals(dt)
-        r.update(i)
-    ax0.plot(t, r.out['v'], c='k', lw=0.5)
-    ax0.set_ylabel('Memb. Pot.')
-    ax0.text(0, 0, '(mV)', va='center', ha='left')
-    ax0.set_xlim(-25, 500)
-    ax0.set_title('A.P. and Costs')
-    return ax0
-
-
-def run_sim(test_freq, spike_quanta, psi_fac=0.1e-4, ros=get_ros(), tau_Q=100):
-    fname_list = [test_freq, spike_quanta, psi_fac, ros.name, tau_Q]
-    filename = '_'.join([str(yy) for yy in fname_list])
-    filename += '.npz'
-    try:
-        kk = np.load('./spike_compensation/'+filename)
-        bls, ros_metb_spikes = kk['bls'], kk['ros_metb_spikes']
-    except FileNotFoundError:
-        print('No prev compute found, running sim now')
-        bls = np.geomspace(1, 1000, 20)
-        ros_metb_spikes = np.zeros_like(bls)
-        for ij, mito_baseline in enumerate(bls):
-            print('Baseline : ', mito_baseline, 'Quanta :', spike_quanta)
-            print('Psi factor: ', psi_fac)
-            dt = 0.01
-            time = 5000
-            t = np.arange(0, time, dt)
-            qdur = 1000
-            qtime = np.arange(0, qdur, dt)
-            this_q = Q_nak(qtime, fact=spike_quanta, tau_Q=tau_Q)
-            qlen = len(this_q)
-            mi = Mito(baseline_atp=mito_baseline)
-            mi.steadystate_vals(time=1000)
-            ros.init_val(mi.atp, mi.psi)
-            spike_expns = np.zeros_like(t)
-            test_isi = 1000 / test_freq
-            test_isi_indx = int(test_isi / dt)
-            num_spikes = int(time / test_isi)
-            for sp in range(1, num_spikes+1):
-                sp_idx = test_isi_indx*sp
-                try:
-                    spike_expns[sp_idx:sp_idx+qlen] += this_q
-                except ValueError:
-                    spike_expns[sp_idx:] += this_q[:len(spike_expns[sp_idx:])]
-            ros_vals = np.zeros_like(t)
-            for i in range(len(t)):
-                mi.update_vals(dt,
-                               atp_cost=spike_expns[i],
-                               leak_cost=spike_expns[i]*psi_fac)
-                ros.update_vals(dt, mi.atp, mi.psi,
-                                spike_expns[i]+mito_baseline)
-                ros_vals[i] = ros.get_val()
-            ros_metb_spikes[ij] = np.mean(ros_vals)
-        np.savez('./spike_compensation/'+filename,
-                 bls=bls, ros_metb_spikes=ros_metb_spikes)
-    return bls, ros_metb_spikes
-
-
-def spike_quanta(baseline_atp, q, f_mcu=0.1e-4, ros=get_ros(), tau_Q=100):
-    '''Perturbation due to a spike'''
-    dt = 0.01
-    time = 1000
-    # factor = 0.1e-4
-    tt = np.arange(0, time, dt)
-    m = Mito(baseline_atp=baseline_atp)
-    m.steadystate_vals(time=2000)  # state 4 - wait till we reach here
-    ros.init_val(m.atp, m.psi)
-    Q_val = Q_nak(tt, q, tau_Q=tau_Q)
-    spike_val = np.zeros_like(tt)
-    ros_vals = np.zeros_like(tt)
-    t_start = 150
-    spike_val[int(t_start/dt):] += Q_val[:len(spike_val[int(t_start/dt):])]
-    rec_vars_list = ['atp', 'psi', 'nad', 'pyr']
-    m_record = Recorder(m, rec_vars_list, time, dt)
-    for ii, ti in enumerate(tt):
-        try:
-            m.update_vals(dt, atp_cost=spike_val[ii],
-                          leak_cost=spike_val[ii]*f_mcu)
-        except IndexError:
-            m.update_vals(dt, leak_cost=0, atp_cost=0)
-        ros.update_vals(dt, m.atp, m.psi,
-                        spike_val[ii]+baseline_atp)
-        ros_vals[ii] = ros.get_val()
-        m_record.update(ii)
-    return m_record, tt, ros_vals
 
 
 def tau_ros_pert(ax, tau_ross, cm=0):
@@ -153,7 +51,7 @@ def tau_ros_pert_rs(ax, gate_ross, baseline_atp=30, cm=0):
         cmap = fp.ln_cols_ros2
         scavs = [5, 50, 500]
     for gate_ros, col, ss in zip(gate_ross, cmap, scavs):
-        m_record, tt, rs = spike_quanta(baseline_atp, q=30,
+        m_record, tt, rs = spike_quanta(baseline_atp, q=0.1,
                                         tau_Q=100, ros=gate_ros)
         ax.plot(tt, rs, lw=1.5, c=col, label=str(ss))
     ax.set_ylim([0, 0.3])
@@ -171,7 +69,7 @@ def tau_ros_pert_sc(ax, gate_ross, freq=10, cm=0):
         cmap = fp.ln_cols_ros2
     # scavs = [0.1, 1, 10]
     for pp, gate_ros in enumerate(gate_ross):
-        b_test, vals = run_sim(test_freq=freq, spike_quanta=30,
+        b_test, vals = run_sim(test_freq=freq, spike_quanta=0.1,
                                ros=gate_ros)
         ax.semilogx(b_test, vals, lw=1.5, c=cmap[pp])
         # ax.semilogx(b_test, vals, lw=1.5, c=cmap[pp],
@@ -250,7 +148,8 @@ gs = gridspec.GridSpec(5, 2, figure=fig, height_ratios=[1, 1, 1, 1, 1],
 ax00 = fig.add_subplot(gs[0, 0])
 ax00 = tau_ros_pert(ax00, [ros_tau_fast, ros_tau, ros_tau_slow])
 ax10 = fig.add_subplot(gs[1, 0])
-ax10 = tau_ros_pert_rs(ax10, gate_ross=[get_ros_fast(), get_ros(),
+ax10 = tau_ros_pert_rs(ax10, gate_ross=[get_ros_fast(),
+                                        get_ros(),
                                         get_ros_slow()], baseline_atp=30)
 ax20 = fig.add_subplot(gs[2, 0])  # 5 Hz
 ax20 = tau_ros_pert_sc(ax20, gate_ross=[get_ros_fast(),
@@ -262,7 +161,7 @@ ax30 = tau_ros_pert_sc(ax30, gate_ross=[get_ros_fast(),
                                         get_ros(),
                                         get_ros_slow()],
                        freq=10)
-ax40 = fig.add_subplot(gs[4, 0])  # 10 Hz
+ax40 = fig.add_subplot(gs[4, 0])  # 20 Hz
 ax40 = tau_ros_pert_sc(ax40, gate_ross=[get_ros_fast(),
                                         get_ros(),
                                         get_ros_slow()],
@@ -273,7 +172,8 @@ neat_axes([ax00, ax20, ax30, ax40])
 
 
 ax01 = fig.add_subplot(gs[0, 1])
-ax01 = tau_ros_pert(ax01, [ros_tau_const_fast, ros_tau_const,
+ax01 = tau_ros_pert(ax01, [ros_tau_const_fast,
+                           ros_tau_const,
                            ros_tau_const_slow], cm=1)
 ax11 = fig.add_subplot(gs[1, 1])
 ax11 = tau_ros_pert_rs(ax11, gate_ross=[get_ros_const_fast(),
@@ -290,11 +190,11 @@ ax31 = tau_ros_pert_sc(ax31, gate_ross=[get_ros_const_fast(),
                                         get_ros_const(),
                                         get_ros_const_slow()],
                        freq=10, cm=1)
-ax41 = fig.add_subplot(gs[4, 1])  # 10 Hz
+ax41 = fig.add_subplot(gs[4, 1])  # 20 Hz
 ax41 = tau_ros_pert_sc(ax41, gate_ross=[get_ros_const_fast(),
                                         get_ros_const(),
                                         get_ros_const_slow()],
-                       freq=21, cm=1)
+                       freq=20, cm=1)
 add_sizebar(ax11, 200, offset=-0.2)
 strip_axes([ax11])
 neat_axes([ax01, ax21, ax31, ax41])
@@ -361,5 +261,5 @@ ax40.text(1.2, 1.1, s='Spike compensation @ 20Hz',
           transform=ax40.transAxes,
           va='center', ha='center', clip_on=False)
 
-plt.savefig('Figure1_supp_b.png', dpi=300, transparent=False)
+plt.savefig('Figure1_supp_ros_scav.png', dpi=300, transparent=False)
 # plt.show()

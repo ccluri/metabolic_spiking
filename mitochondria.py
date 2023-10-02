@@ -1,5 +1,5 @@
 import numpy as np
-from math import exp
+from math import exp, erf
 
 # -------------------------------------
 # K ANT =  0.001; PSI_max = 0.1865
@@ -100,7 +100,10 @@ class Mito(object):
         self.oaa = oaa
         self.nad = nad
         self.atp = atp
+        self.atpc = atp  # at equilibrium
         self.dpsi = dpsi
+        self.Fkant = 0
+        self.dFkantdt = 0
         self.atp_range = atp_range  # K_ant from outside is 1/ks
         self.baseline_atp = baseline_atp
         self.k_r = k_r
@@ -119,7 +122,9 @@ class Mito(object):
         self.v7 = beta7*self.pyr*self.atp
         self.v8 = beta8*self.oaa
         self.vl = betal(current_leak)*self.dpsi
-        self.vant = bant(self.k_ant)*self.atp
+        # self.vant = bant(self.k_ant)*self.atp
+        self.vant = (1+self.dFkantdt)*bant(self.k_ant)*self.atp
+        # self.vant = (10**self.Fkant)*bant(self.k_ant)*self.atp
         self.vr = betar(self.k_r)*(1-self.nad)/(dr1+1-self.nad)/(1+exp(dr2*(self.dpsi-1)))
         acrit = Pis/(Pis+exp(dg0-dc*self.dpsi))
         self.vatp = batp*(2/(1+exp(datp*(self.atp-acrit)))-1)
@@ -153,10 +158,13 @@ class Mito(object):
         self.dnaddt = (-self.v2 - self.v4 - 2*self.v5 + self.vr)*e5
         self.datpdt = (self.vatp - self.vant + self.v5 - self.v7)*e6
         self.ddpsidt = (10*self.vr - self.vl - 3*self.vatp - self.vant)*e7
-
+        self.dFkantdt = erf(10*(self.atp - self.atpc))/0.1
+        
     def update_vals(self, dt, atp_cost=0, leak_cost=0):
         taum = dtm*dt  # scaling
-        current_atp = self.baseline_atp + atp_cost
+        self.atpc = atp_cost
+        # print(self.dFkantdt, self.Fkant, self.atpc)
+        current_atp = self.baseline_atp  # + atp_cost
         current_leak = kl + leak_cost  # as a factor of kl
         self.reaction_rates(current_atp, current_leak)
         self.derivatives()
@@ -169,14 +177,16 @@ class Mito(object):
         self.atp += self.datpdt*taum
         self.dpsi += self.ddpsidt*taum
         self.psi = to_psi(self.dpsi)
-
+        self.Fkant += self.dFkantdt*taum
+        
+        
     def steadystate_vals(self, time=2000):
         print('Baseline ATP = ', self.baseline_atp)
         print('ATP Op.Range = ', self.atp_range)
         print('K ANT = ', self.baseline_atp / (self.atp_range))
         dt = 0.01
         for tt in np.arange(0, time, dt):
-            self.update_vals(dt, atp_cost=0, leak_cost=0)
+            self.update_vals(dt, atp_cost=self.atp, leak_cost=0)
 
 
 if __name__ == '__main__':

@@ -11,7 +11,7 @@ from palettable.cartocolors.sequential import Burg_5
 from palettable.colorbrewer.qualitative import Set2_8, Set1_8, Set3_12
 from palettable.colorbrewer.sequential import RdPu_5, BuPu_5, YlGn_5
 
-plt.rcParams.update({
+style_dict = {
     'font.family': 'sans-serif',
     'font.sans-serif': 'Arial',
     'xtick.labelsize': 6,
@@ -33,7 +33,8 @@ plt.rcParams.update({
     'axes.titlepad': 2,
     'legend.fontsize': 7,
     'axes.linewidth': 0.5
-})
+}
+plt.rcParams.update(style_dict)
 
 
 def add_arrow(line, position=None, direction='right', size=15,
@@ -42,7 +43,7 @@ def add_arrow(line, position=None, direction='right', size=15,
     add an arrow to a line.
 
     line:       Line2D object
-    position:   x-position of the arrow. If None, min*1.007 of xdata is taken
+    position:   (x,y)-position of the arrow. If None, min*1.007 of xdata is taken
     direction:  'left' or 'right'
     size:       size of the arrow in fontsize points
     color:      if None, line color is taken.
@@ -52,11 +53,14 @@ def add_arrow(line, position=None, direction='right', size=15,
 
     xdata = line.get_xdata()
     ydata = line.get_ydata()
-
+    
     if position is None:
         position = np.min(xdata)
     # find closest index
-    start_ind = np.argmin(np.absolute(xdata - position))  # - 1500
+    # start_ind = np.argmin(np.absolute(xdata - position))  # - 1500
+    start_ind = np.argmin(np.linalg.norm(np.stack((xdata, ydata)) -
+                                         np.array(position).reshape(2, 1),
+                                         axis=0))
     print('Verify that this has changed since, offset?')
     if direction == 'right':
         end_ind = start_ind + 1
@@ -173,5 +177,6 @@ ln_cols_ros = [def_colors['ln16'], def_colors['ln17'], def_colors['ln18']]
 ln_cols_tau = [def_colors['ln13'], def_colors['ln14'], def_colors['ln15']]
 ln_cols_q = [def_colors['ln10'], def_colors['ln11'], def_colors['ln12']]
 ln_cols_fet = ['#a6761d', '#e6ab02']
-ln_cols_ret = ['#1f78b4', '#a6cee3', 'k']
+# ln_cols_ret = ['#1f78b4', '#a6cee3', 'k']
+ln_cols_ret = ['#1f78b4', '#38baff', 'k']
 ln_cols_rise = [def_colors['ln1'], def_colors['ln2'], def_colors['ln3']]

@@ -70,19 +70,20 @@ def quantum(ax1):
     '''Illustrating baseline plus Q atp->adp'''
     dt = 0.01
     tt = np.arange(0, 500, dt)
-    Qval = np.zeros_like(tt)
-    vals = Q_nak(tt, 30)
-    Qval[int(150/dt):] += vals[:len(Qval[int(150/dt):])]
-    Qval[int(175/dt):] += vals[:len(Qval[int(175/dt):])]
+    Qval = np.zeros_like(tt) + 0.75
+    vals = Q_nak(tt, 0.1)
+    Qval[int(150/dt):] -= vals[:len(Qval[int(150/dt):])]
+    Qval[int(175/dt):] -= vals[:len(Qval[int(175/dt):])]
     ax1.plot(tt, Qval, c='k', lw=0.5)
     ax1.set_xlabel('Time (ms)')
-    ax1.set_ylim(-20, 70)
-    ax1.set_ylabel(r'$ATP_C \rightarrow ADP_C$'+'\n(%s)' % Kant_units)
+    ax1.set_ylim(0.4, 0.8)
+    ax1.set_ylabel(r'$ATP_C$'+'(a.u.)')
     ax1.set_yticks([])
     ax1.set_yticklabels([])
-    ax1.plot(100, 0, marker='*', c='k', clip_on=False, markersize=7,
-             markeredgecolor='none')
-    ax1.text(s='+Q', x=120, y=27.5, fontsize=7)
+    ax1.plot(100, 0.75, marker='*', c='k', clip_on=False, markersize=7,
+             markeredgecolor='w', markeredgewidth=0.1)
+    ax1.text(s='-Q', x=130, y=.65, fontsize=7)
+    ax1.text(s='-Q', x=155, y=.55, fontsize=7)
     ymin, ymax = ax1.get_ybound()
     asb0 = AnchoredSizeBar(ax1.transData,
                            int(25),
@@ -104,31 +105,33 @@ def spike_rise(ax, xlim, ylim):
     dt = 0.01
     tt = np.arange(0, 500, dt)
     t_peak = []
-    for cc, rise_tm in zip(fp.ln_cols_rise, [0.1, 0.6, 1.2]):
-        Qval = np.zeros_like(tt)
-        vals = Q_nak(tt, 30, tau_rise=rise_tm)
-        Qval[int(150/dt):] += vals[:len(Qval[int(150/dt):])]
-        t_peak_val = tt[np.argmax(Qval)]-150
+    for cc, rise_tm in zip(fp.ln_cols_rise, [3, 5, 7]):
+        Qval = np.zeros_like(tt) + 0.75
+        vals = Q_nak(tt, 0.1, tau_rise=rise_tm)
+        Qval[int(150/dt):] -= vals[:len(Qval[int(150/dt):])]
+        t_peak_val = tt[np.argmin(Qval)]-150
         t_peak.append(t_peak_val)
         ax.plot(tt, Qval, c=cc, label=str(int(t_peak_val)) + ' ms', lw=0.5)
+        # ax.plot(tt, Qval, c=cc, label=str(int(rise_tm)) + ' ms', lw=0.5)
     print(t_peak)
-    ax.plot(150, -5, marker='o', c='g', clip_on=False, markersize=5)
+    ax.plot(150, 0.75, marker='o', c='g', clip_on=False, markersize=5)
     ax.plot([150, 150], [-5, 70], ls=':', c='g', lw=0.5)
     ax.annotate('$t_{lag}$', va='center',
-                xy=(149.6, 35), xycoords='data', color=fp.ln_cols_rise[0],
-                xytext=(149.6+t_peak[0]+1, 35), textcoords='data',
+                xy=(149.6, 0.62), xycoords='data', color=fp.ln_cols_rise[0],
+                xytext=(149.6+t_peak[0]+1, 0.62), textcoords='data',
                 arrowprops=dict(arrowstyle="|-|", mutation_scale=3, lw=1,
                                 color=fp.ln_cols_rise[0]))
-    ax.legend(frameon=False, loc='lower left', handlelength=0.5, ncol=1,
-              title='$t_{lag}$', bbox_to_anchor=(0.6, -0.05),
-              bbox_transform=ax.transAxes)
+    ll = ax.legend(frameon=False, loc='upper right', handlelength=0.5, ncol=1)
+                   # title='$t_{lag}$') # , bbox_to_anchor=(0.6, -0.05),
+              # bbox_transform=ax.transAxes)
+    ax.text(163, 0.78, s=r'$t_{lag}$')
     ax.set_xlim(xlim)
     ax.set_ylim(ylim)
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
 
 
-def plot_summary_ret(gs, filename_prefix_ret='refrac_6_rise_0.6'):
+def plot_summary_ret(gs, filename_prefix_ret):
     data = np.load('./spike_compensation/spike_compensate_summary_' + filename_prefix_ret + '.npz')
     cv = data['cv']
     netros = data['netros']
@@ -140,7 +143,7 @@ def plot_summary_ret(gs, filename_prefix_ret='refrac_6_rise_0.6'):
     # cax1 = plt.subplot(gs[1, 0])
     # cbar = plt.colorbar(rr, cax=cax1, orientation="horizontal")
     # cbar.set_ticks([0, 1])
-    ax1.set_title('Average ROS (a.u.)', pad=5)
+    ax1.set_title('Average ROS (a.u.)', pad=7)
     ax2 = plt.subplot(gs[0, 1])
     fr_norm = colors.LogNorm(vmin=1, vmax=300)
     ii = ax2.imshow(fr*1000, origin='lower',
@@ -149,7 +152,7 @@ def plot_summary_ret(gs, filename_prefix_ret='refrac_6_rise_0.6'):
     # cbar = plt.colorbar(ii, cax=cax2, orientation="horizontal",
     #                     extend='min')
     # cbar.set_ticks([1, 10, 100])
-    ax2.set_title('Firing rate (Hz)', pad=5)
+    ax2.set_title('Firing rate (Hz)', pad=7)
 
     ax3 = plt.subplot(gs[0, 2])
     cmap = cm.RdYlBu
@@ -160,8 +163,8 @@ def plot_summary_ret(gs, filename_prefix_ret='refrac_6_rise_0.6'):
     # cbar = plt.colorbar(bb, cax=cax3, orientation="horizontal",
     #                     extend='max')
     # cbar.set_ticks([0, 1, 2])
-    ax3.set_title('CV', pad=5)
-    ax1.set_ylabel('Per-spike cost Q (%s)' % Kant_units)
+    ax3.set_title('CV', pad=7)
+    ax1.set_ylabel('Per-spike cost Q (a.u.)')
     ax2.set_xlabel('Non-spiking costs (%s)' % Kant_units)
     fix_axis_ticks([ax1, ax2, ax3], mito_baseline, spike_quanta)
     return
@@ -183,7 +186,7 @@ def plot_summary_fet(gs, filename_prefix_fet):
     cax1 = plt.subplot(gs[1, 0])
     cbar = plt.colorbar(rr, cax=cax1, orientation="horizontal")
     cbar.set_ticks([0, 1])
-    ax1.set_title(r'$\Delta$ ROS (a.u.)', pad=5)
+    ax1.set_title(r'$\Delta$ ROS (a.u.)', pad=7)
     ax2 = plt.subplot(gs[2, 1])
     fr_norm = colors.LogNorm(vmin=1, vmax=300)
     ii = ax2.imshow(fr, origin='lower',
@@ -192,7 +195,7 @@ def plot_summary_fet(gs, filename_prefix_fet):
     cbar = plt.colorbar(ii, cax=cax2, orientation="horizontal",
                         extend='min')
     cbar.set_ticks([1, 10, 100])
-    ax2.set_title('Firing rate (Hz)', pad=5)
+    ax2.set_title('Firing rate (Hz)', pad=7)
     ax3 = plt.subplot(gs[2, 2])
     cmap = cm.RdYlBu
     new_cmap = fp.truncate_colormap(cmap, 0.15, 0.85)
@@ -202,8 +205,8 @@ def plot_summary_fet(gs, filename_prefix_fet):
     cbar = plt.colorbar(bb, cax=cax3, orientation="horizontal",
                         extend='max')
     cbar.set_ticks([0, 1, 2])
-    ax3.set_title('CV', pad=5)
-    ax1.set_ylabel('Per-spike cost Q (%s)' % Kant_units)
+    ax3.set_title('CV', pad=7)
+    ax1.set_ylabel('Per-spike cost Q (a.u.)')
     ax2.set_xlabel('Non-spiking costs (%s)' % Kant_units)
     fix_axis_ticks([ax1, ax2, ax3], mito_baseline, spike_quanta)
     return
@@ -236,15 +239,20 @@ def fix_axis_ticks(axs, mito_baseline, spike_quanta,
             ax.set_xticklabels([])
     axs[0].set_yticks(np.arange(len(spike_quanta))[::2])
 
-    labels = ["{0:.1f}".format(x) for x in spike_quanta]
+    labels = ["{0:.1f}".format(x*100) for x in spike_quanta]
     if ylabels:
         axs[0].set_yticklabels(labels[::2])
+        fontprops = fm.FontProperties(size=6)
+        axs[0].text(0., 1.05, s="1e-2", ha='left', va='center',
+                    transform=axs[0].transAxes, fontproperties=fontprops)
+
     else:
         axs[0].set_yticklabels([])
     for ax in axs[1:]:
         ax.set_yticks(np.arange(len(spike_quanta))[::2])
         labels = ["" for x in spike_quanta]
         ax.set_yticklabels(labels[::2])
+
 
 
 def align_axis_labels(ax_list, axis='x', value=-0.25):
@@ -267,7 +275,7 @@ if __name__ == '__main__':
                                                            0.9],
                                             subplot_spec=gs[0, :])
 
-    plot_summary_ret(gs00, filename_prefix_ret='refrac_6_rise_0.6')
+    plot_summary_ret(gs00, filename_prefix_ret='refrac_6_rise_5.0')
     plot_summary_fet(gs00, filename_prefix_fet='iclamp2')
 
     gs1 = gridspec.GridSpecFromSubplotSpec(2, 2, wspace=0.2,
@@ -278,9 +286,9 @@ if __name__ == '__main__':
     ax_atp_costs = plt.subplot(gs1[1, 0])
     quantum(ax_atp_costs)
     align_axis_labels([ax_atp_costs], axis='y', value=-0.1)
-    xy_inset = (145, -5)
-    wd_inset = 20
-    ht_inset = 45
+    xy_inset = (145, 0.6)
+    wd_inset = 40
+    ht_inset = 0.2
     ax_spike_rises = plt.subplot(gs1[:, 1])
     spike_rise(ax_spike_rises,
                xlim=[xy_inset[0], xy_inset[0]+wd_inset],
@@ -302,12 +310,12 @@ if __name__ == '__main__':
                                    lw=0.3, color='gray',
                                    coordsA="data", coordsB="axes fraction")
     ax_atp_costs.add_patch(ccp2)
-    title_texts = ['4 ms', '8 ms', '12 ms']
+    title_texts = ['23 ms', '33 ms', '42 ms']
     axs = []
     gs2 = gridspec.GridSpecFromSubplotSpec(3, 3, wspace=0.2,
                                            width_ratios=[1, 1, 1],
                                            subplot_spec=gs[2, :])
-    for ii, rise_tm in enumerate(['_rise_0.1', '_rise_0.6', '_rise_1.2']):
+    for ii, rise_tm in enumerate(['_rise_3.0', '_rise_5.0', '_rise_7.0']):
         for jj, refrac in enumerate([2, 6, 10]):
             filename_prefix = 'refrac_' + str(refrac) + rise_tm
             ax = plt.subplot(gs2[jj, ii])
@@ -317,10 +325,10 @@ if __name__ == '__main__':
             fix_axis_ticks([ax], mb, sq, xlabels, ylabels)
             if jj == 0:
                 ax.set_title('$t_{lag}$ = ' + title_texts[ii],
-                             color=fp.ln_cols_rise[ii], pad=5)
+                             color=fp.ln_cols_rise[ii], pad=7)
             if ii == 0:
                 if jj == 1:
-                    ax.set_ylabel('Per-spike cost Q (%s)' % Kant_units)
+                    ax.set_ylabel('Per-spike cost Q (a.u.)')
             if ii == 2:
                 ax.text(1.1, .5, '$t_{ref}$ = ' + str(refrac) + ' ms',
                         va='center', ha='left', clip_on=False,
