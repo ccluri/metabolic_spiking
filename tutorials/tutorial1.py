@@ -46,7 +46,7 @@ def ros_ss(min_atp=10, max_atp=200):
         ax.set_xlabel(r'Non-spiking costs (%s)' % kANT_units)
         ax.set_ylabel(r'ROS level (a.u.)')
         plt.legend(frameon=False, loc='upper right')
-        #plt.show()
+        plt.show()
     return
 
 
@@ -137,7 +137,7 @@ def ros_ss_steady(bl):
         ax2.set_xticklabels(['ATP', 'PSI', 'NAD+', 'Pyr', 'ROS'])
         ax2.spines['right'].set_visible(False)
         ax2.spines['top'].set_visible(False)
-        #plt.show()
+        plt.show()
     return
 #######################################################
 
@@ -217,7 +217,7 @@ def spike_shape(bl=45, q=0.1, tau_Q=100, tau_rise=5):
         ax.spines['right'].set_visible(False)
         ax.spines['top'].set_visible(False)
         ax.set_yticks([0, 0.25, 0.5, 0.75, 1])
-        #plt.show()
+        plt.show()
 #######################################################
 
 ca_fact = widgets.FloatSlider(value=1e-3,
@@ -311,7 +311,7 @@ def spike_quanta(bl, q=0.1, tau_Q=tau_Q, tau_rise=tau_rise, f_mcu=1e-3):
         ax2.set_xlabel('Time (ms)')
         ax2.spines['right'].set_visible(False)
         ax2.spines['top'].set_visible(False)
-        #plt.show()
+        plt.show()
     return
 
 ###############################################
