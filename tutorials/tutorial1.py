@@ -102,7 +102,7 @@ rosss_output = widgets.Output()
 
 def ros_ss_steady(bl):
     with rosss_output:
-        clear_output
+        clear_output()
         fig = plt.figure(figsize=(10, 5), dpi=100)
         ax = plt.subplot(121)
         min_atp = min_kant.value
@@ -204,7 +204,7 @@ def spike_shape(bl=45, q=0.1, tau_Q=100, tau_rise=5):
     spike_val = np.zeros_like(tt) + atp(bl)
     spike_val[int(t_start/dt):] -= Q_val[:len(spike_val[int(t_start/dt):])]
     with sshape:
-        clear_output
+        clear_output()
         fig = plt.figure(figsize=(5, 5), dpi=100)
         ax = plt.subplot(111)
         ax.plot(tt, spike_val, lw=2, c='k')
@@ -282,7 +282,7 @@ def spike_quanta(bl, q=0.1, tau_Q=tau_Q, tau_rise=tau_rise, f_mcu=1e-3):
                         m.k_ant*1000)   # keeping with the prev. ver.
         ros_vals[ii] = ros.get_val()
     with squanta:
-        clear_output
+        clear_output()
         f, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 5), dpi=100,
                                      gridspec_kw={'width_ratios': [1, 2]})
         ax1.contourf(ATP, PSI, ROS, 50, cmap=cm.Reds)
