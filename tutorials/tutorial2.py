@@ -211,7 +211,7 @@ tau_rise = widgets.FloatSlider(value=5,
 
 fact = widgets.FloatSlider(value=0.1,
                            min=0.01,
-                           max=0.2,
+                           max=0.5,
                            step=0.01,
                            description='Per-spike costs:',
                            disabled=False,
@@ -220,8 +220,12 @@ fact = widgets.FloatSlider(value=0.1,
                            readout=True,
                            readout_format='.2f', style=style,
                            layout=widgets.Layout(width='500px'))
-                        
-                              
+
+def update_fact_max(*args):
+    fact.max = min(atp(curr_cost1.value)-0.05, 0.5)
+fact.observe(update_fact_max, 'value')
+
+
 def reset_button2(defaults={}):
     def on_button_clicked(_):
         for k, v in defaults.items():
