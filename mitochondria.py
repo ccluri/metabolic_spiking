@@ -102,7 +102,6 @@ class Mito(object):
         self.atp = atp
         self.atpc = atp  # at equilibrium
         self.dpsi = dpsi
-        self.Fkant = 0
         self.dFkantdt = 0
         self.atp_range = atp_range  # K_ant from outside is 1/ks
         self.baseline_atp = baseline_atp
@@ -122,9 +121,7 @@ class Mito(object):
         self.v7 = beta7*self.pyr*self.atp
         self.v8 = beta8*self.oaa
         self.vl = betal(current_leak)*self.dpsi
-        # self.vant = bant(self.k_ant)*self.atp
         self.vant = (1+self.dFkantdt)*bant(self.k_ant)*self.atp
-        # self.vant = (10**self.Fkant)*bant(self.k_ant)*self.atp
         self.vr = betar(self.k_r)*(1-self.nad)/(dr1+1-self.nad)/(1+exp(dr2*(self.dpsi-1)))
         acrit = Pis/(Pis+exp(dg0-dc*self.dpsi))
         self.vatp = batp*(2/(1+exp(datp*(self.atp-acrit)))-1)
@@ -163,7 +160,6 @@ class Mito(object):
     def update_vals(self, dt, atp_cost=0, leak_cost=0):
         taum = dtm*dt  # scaling
         self.atpc = atp_cost
-        # print(self.dFkantdt, self.Fkant, self.atpc)
         current_atp = self.baseline_atp  # + atp_cost
         current_leak = kl + leak_cost  # as a factor of kl
         self.reaction_rates(current_atp, current_leak)
@@ -177,8 +173,7 @@ class Mito(object):
         self.atp += self.datpdt*taum
         self.dpsi += self.ddpsidt*taum
         self.psi = to_psi(self.dpsi)
-        self.Fkant += self.dFkantdt*taum
-        
+
         
     def steadystate_vals(self, time=2000):
         print('Baseline ATP = ', self.baseline_atp)
