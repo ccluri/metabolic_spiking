@@ -10,8 +10,14 @@ Explore the basic spiking with metabolism: [Tutorial1](https://colab.research.go
 Explore how spiking can provide RETROS protection: [Tutorial2](https://colab.research.google.com/drive/17lnH_0DHNORWwQ4vwI2Rqt76sqKVrXJ7?usp=sharing)
 
 
-Binder based (currently facing slow loading times, please use above links for now.)
-Launch tutorial1 by clicking : [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ccluri/metabolic_spiking/renorm)
+Binder based, select individual file Tutorial.ipynb and Tutorial2.ipynb to explore the same files as above.
+(Currently facing slow loading times, please use above links for now.)
+
+Launch tutorial1 by clicking : [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ccluri/metabolic_spiking/HEAD?labpath=tutorials%2FTutorial1.ipynb)
+
+Launch tutorial2 by clicking : [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ccluri/metabolic_spiking/HEAD?labpath=tutorials%2FTutorial2.ipynb)
+
+
 
 
 
